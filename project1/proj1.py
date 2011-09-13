@@ -109,7 +109,7 @@ class Node(object):
         #  3) There are no attrs left to partition on
         
         n_data = len(ex_set)
-        n_half_data = n_data/2
+        n_half_data = n_data/2.0
         n_pos = 0
         
         #both checks are True if homogeneous data
@@ -120,6 +120,7 @@ class Node(object):
             
             if attr_check: #still looks homogeneous for attrs
                 attr_check = all([ex[attr]==ex_set[0][attr] for attr in attr_set])
+                
             if classifier_check: #still looks homogeneous for classifiers    
                 classifier_check = ex[-1] == ex_set[0][-1]
             
@@ -134,8 +135,7 @@ class Node(object):
         else: 
             mcc = n_pos > n_half_data    
             
-        
-        return mcc, ((not attr_check) and (not classifier_check))
+        return mcc, not(attr_check or classifier_check)
         
     def train(self,ex_set,attr_set,depth=0): 
         """trains a tree, based on the given data. depth is used to track tree depth 

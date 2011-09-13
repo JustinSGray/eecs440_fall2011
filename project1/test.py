@@ -33,7 +33,32 @@ class Test(unittest.TestCase):
         
         n = Node()   
         
-        self.assertTrue(n.check_ex_set(examples,[1,3]))    
+        
+        self.assertTrue(n.check_ex_set(examples,[1,3]))  
+        self.assertTrue(n.check_ex_set(examples,[1,3]))
+        
+        index,part_data = n.max_GR(examples,[1,3])  
+        self.assertEqual(index,1)
+        test_part_data = [ex for ex in examples if ex[1]=='red']
+        self.assertEqual(set(test_part_data),set(part_data['red']))
+        
+        self.assertTrue(n.check_ex_set(part_data['red'],[3,])[1])
+        index,sub_data = n.max_GR(part_data['red'],[3])  
+        self.assertEqual(index,3)
+        
+        test_part_data = [ex for ex in examples if ex[1]=='green']
+        self.assertEqual(set(test_part_data),set(part_data['green']))
+        self.assertFalse(n.check_ex_set(part_data['green'],[3,])[1])
+        
+        test_part_data = [ex for ex in examples if ex[1]=='blue']
+        self.assertEqual(set(test_part_data),set(part_data['blue']))
+        self.assertTrue(n.check_ex_set(part_data['blue'],[3,])[1])
+        index,sub_data = n.max_GR(part_data['blue'],[3])  
+        self.assertEqual(index,3)
+        
+        index,sub_data = n.max_GR(examples,[3,1])  
+        self.assertEqual(index,3)
+        
             
         
     def test_part_discrete_data(self): 
@@ -77,7 +102,10 @@ class Test(unittest.TestCase):
         n = Node()
         
         n.train(data,[1,3]) #only train on the discrete data
-        print [ex[-1]==n.predict(ex) for ex in data]
+        
+        self.assertTrue(all([ex[-1]==n.predict(ex) for ex in data]))
+        
+        n.train(data,[3,1]) #only train on the discrete data
         
         self.assertTrue(all([ex[-1]==n.predict(ex) for ex in data]))
 
