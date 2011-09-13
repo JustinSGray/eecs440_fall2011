@@ -143,8 +143,8 @@ class Node(object):
         
         mcc,partable = self.check_ex_set(ex_set,attr_set)
         
-        if partable and not depth == MAX_DEPTH: 
-            attr,part_data = max_GR(ex_set,attr_set)
+        if partable and not (depth == MAX_DEPTH and MAX_DEPTH > 0): 
+            attr,part_data = self.max_GR(ex_set,attr_set)
             self.attr_index = attr
             new_attr_set = attr_set[:]
             new_attr_set.remove(attr) 
@@ -163,7 +163,7 @@ class Node(object):
             
         if self.is_leaf: 
             return self.classifier
-        return self.children[example[self.attr_index]]
+        return self.children[example[self.attr_index]].predict(example)
             
     def shape(self): 
         """returns a 2-tuple of (size,depth)"""
@@ -194,5 +194,13 @@ if __name__=="__main__":
     print 
     
     train_data,test_data = load_project_data(problem_name)
+      
 
-    print len(train_data) + len(test_data)    
+    #train_attrs = range(1,len(train_data[0])
+    train_attrs = [1,3]
+    tree = Node()
+    tree.train(train_data,train_attrs)
+    
+    print tree.shape()
+    
+    print "training data check: ", [ex[-1]==tree.predict(ex) for ex in train_data]   

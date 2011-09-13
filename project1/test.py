@@ -25,6 +25,17 @@ class Test(unittest.TestCase):
         self.assertEqual(7,len(train_data))
         self.assertEqual(2,len(test_data))
         
+    def test_is_partable_data(self): 
+        train_data, test_data = load_project_data('example')
+        
+        examples = [ex for ex in train_data] + [ex for ex in test_data]
+        data = ExampleSet(examples) 
+        
+        n = Node()   
+        
+        self.assertTrue(n.check_ex_set(examples,[1,3]))    
+            
+        
     def test_part_discrete_data(self): 
         train_data, test_data = load_project_data('example')
         
@@ -66,8 +77,9 @@ class Test(unittest.TestCase):
         n = Node()
         
         n.train(data,[1,3]) #only train on the discrete data
+        print [ex[-1]==n.predict(ex) for ex in data]
         
-        all([ex[-1]==n.predict(ex) for ex in data])
+        self.assertTrue(all([ex[-1]==n.predict(ex) for ex in data]))
 
             
           
