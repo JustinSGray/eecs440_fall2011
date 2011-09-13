@@ -35,6 +35,15 @@ def load_project_data(project_name):
 class Binner(object): #default implementation
     def __call__(self,value): 
         return value   
+        
+class ContBinner(object): 
+    def __init__(self): 
+        self.threshold = None
+                
+    def __call__(self,value): 
+        if value <= self.threshold: 
+            return 0
+        else: return 1        
 
 class Node(object): 
     
@@ -46,16 +55,10 @@ class Node(object):
         self.is_leaf = False #determines if you're a leaf node or not
         self.classifier = None 
         
-    def partition_data(self,ex_set,attr_index): 
-        """returns a 3-tuple of (H_x,H_y_x,partitioned_data)"""  
-        part_data = {}
-        n_data = float(len(ex_set))
-        for ex in ex_set: 
-               #converts the value to a binned value, really only needed for continuous attrs though
-               bin = self.binner(ex[attr_index])    
-               part_data.setdefault(bin,[]).append(ex)
+    def calc_entropies(self,part_data):
         H_y_x = 0
         H_x = 0 
+        n_data = sum([len(sub_data) for feature,sub_data in part_data.iteritems()])
         for bin,data in part_data.iteritems(): 
             n_bin = float(len(data))
             
@@ -70,8 +73,41 @@ class Node(object):
                 
             H_x += -1*p_bin*log(p_bin,2) 
             H_y_x += p_bin*H_y_x_bin
-        return H_x,H_y_x,part_data  
-              
+        return H_x,H_y_x      
+        
+    def partition_data(self,ex_set,attr_index): 
+        """returns a 3-tuple of (H_x,H_y_x,partitioned_data)"""  
+        part_data = {}
+        ex_set = ExampleSet(ex_set)
+
+        if ex_set.schema[attr_index].type == 'CONTINUOUS': 
+            self.binner = ContBinner()
+            
+            ex_set = sorted(ex_set,key=lambda x:x[attr_index])
+            
+            max_entropy_set = (None,None,None)
+            for ex1,ex2 in zip(ex_set[:-1],ex_set[1:]): 
+                if ex1[-1] == ex2[-1]: #not a threshold
+                    continue
+                else:     
+                    self.binner.threshold = ex1[attr_index]
+                    for ex in ex_set: 
+                        bin = self.binner(ex[attr_index])
+                        part_data.setdefault(bin,[]).append(ex)     
+                    
+                    H_x,H_y_x = self.calc_entropies(part_data)  
+                if H_y_x > max_entropy_set[1]: 
+                    max_entropy_set =  H_x,H_y_x,part_data
+            H_x,H_y_x,part_data = max_entropy_set
+                       
+        else:     
+            for ex in ex_set: 
+                   #converts the value to a binned value, really only needed for continuous attrs though
+                   bin = self.binner(ex[attr_index])    
+                   part_data.setdefault(bin,[]).append(ex)
+        
+        H_x,H_y_x = self.calc_entropies(part_data)      
+        return H_x,H_y_x,part_data 
               
     def max_GR(self,ex_set,attr_set): 
         """returns a 2-tuple of (attr_index,part_data) for the attr with the max GR"""
@@ -197,8 +233,9 @@ if __name__=="__main__":
     train_data,test_data = load_project_data(problem_name)
       
 
-    #train_attrs = range(1,len(train_data[0])
-    train_attrs = [1,3]
+    train_attrs = range(1,len(train_data[0])-1)
+    print train_attrs
+    #train_attrs = [1,3]
     tree = Node()
     tree.train(train_data,train_attrs)
     
