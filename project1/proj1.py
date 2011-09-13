@@ -145,12 +145,10 @@ class Node(object):
         if partable and not (depth == MAX_DEPTH and MAX_DEPTH > 0):
             attr,part_data = self.max_GR(ex_set,attr_set)
             self.attr_index = attr
-            new_attr_set = attr_set[:]
-            new_attr_set.remove(attr) 
         
             for feature,sub_data in part_data.iteritems():
                 self.children[feature] = Node()
-                self.children[feature].train(sub_data,new_attr_set,depth+1)
+                self.children[feature].train(sub_data,attr_set,depth+1)
                 
         else: 
             self.is_leaf = True
@@ -162,7 +160,11 @@ class Node(object):
             
         if self.is_leaf: 
             return self.classifier
-        return self.children[example[self.attr_index]].predict(example)
+        try:     
+            bin = self.binner(example[self.attr_index])
+            return self.children[bin].predict(example)
+        except KeyError: #if the classifier is not in this child, randomly select a value
+            return random.randint(0,1)    
             
     def shape(self): 
         """returns a 2-tuple of (size,depth)"""
@@ -196,7 +198,7 @@ if __name__=="__main__":
       
 
     #train_attrs = range(1,len(train_data[0])
-    train_attrs = range(1,17)
+    train_attrs = [1,3]
     tree = Node()
     tree.train(train_data,train_attrs)
     
