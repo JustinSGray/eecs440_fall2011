@@ -143,6 +143,7 @@ class Node(object):
         
         mcc,partable = self.check_ex_set(ex_set,attr_set)
         
+        
         if partable and not (depth == MAX_DEPTH and MAX_DEPTH > 0): 
             attr,part_data = self.max_GR(ex_set,attr_set)
             self.attr_index = attr
@@ -202,5 +203,7 @@ if __name__=="__main__":
     tree.train(train_data,train_attrs)
     
     print tree.shape()
-    
-    print "training data check: ", [ex[-1]==tree.predict(ex) for ex in train_data]   
+    print "tree root attr_index: ", tree.attr_index
+    print "training data check: " 
+    for ex in train_data: 
+        print ex[1:-1],ex[-1],tree.predict(ex)
