@@ -1,0 +1,230 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\title{EECS 440: HW 2}
+\author{Justin Gray}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+\maketitle
+
+1)For three random variables A, B and C, show with a counterexample that the 
+statement ``A is independent of B'' does not imply the statement ``A is 
+independent of B given C.''
+
+Assume that A is the random variable which represents the value achieved by 
+rolling a single die. Assume that B is the random variable which represents the 
+value achieved by rolling a die a second time. Now, if you assume that C is a 
+random variable which represents the value achieved by summing the values rolled 
+by two separate dice tosses. 
+
+Given some value of A, you can infer nothing about B, therefore A is independent 
+of B. However, given A and C, you know exactly what the value of B would have 
+to be. Therefore, Given A and C, A is no longer independent of B. 
+
+\pagebreak
+2)A web crawler samples a set of web pages as follows. It starts at a random 
+page and stores that page. Then it uniformly randomly picks one of the links 
+on that page and follows it. It keeps storing new pages it sees in this way 
+until it encounters a page with no links, and then it stops. The probability 
+that a page has N links is $2^{-(N+1)}$. (a) Find the expected number of steps 
+the web crawler will take before stopping.(b) Assuming the web has M pages, 
+find the expected number of pages the web crawler will store in its cache.
+
+a) The probability that any page has 0 links is $2^{-(0+1)} = \frac{1}{2}$. 
+That means that the probability of a page having any number of links, other than 
+0, is also $\frac{1}{2}$. So the random variable, N, follows a binomial 
+distribution. 
+
+Each page can be seen as an independent event, where there is a 50\% chance of 
+having any links to follow. So for each page will follow the rules of a 
+bernoulli trial, with p=.5. You could describe the number of pages 
+followed by the crawler as a new random variable K, representing the number of
+bernoulli trials needed before you get a negative result (a page with no links). 
+K, will therfore follow a geometric distribution because that predicts the number 
+of bernoulli trials needed before reaching a failure. 
+
+The expected value of a geometric distribution, with p=.5, is: 
+\begin{equation}
+    E[X] =\frac{1}{p} = \frac{1}{.5} = 2
+\end{equation}
+
+Therefore the expected value for K, or the number of pages the crawler will 
+follow before encounting a failure, is 2. That means the crawler can be
+expected to take 2 steps.
+
+b) Assuming that $ M \geq 3$, then the value for M is irrelevant. The crawler 
+is expected to take 2 steps. Including the starting page, the crawler will see 
+three pages in it's two steps. So it will store three pages. If howerver,
+$M \leq 3$ then the crawler will store M pages. 
+
+\pagebreak
+\setcounter{equation}{0}
+3)Points are sampled uniformly at random from $(0,1)^2$ so that they lie on the 
+line $x+y=1$. Determine the expected squared distance between any two sampled 
+points. 
+
+The square of the distance between any two points $X_0=(x_0,y_0),X_1=(x_1,y_1)$ is: 
+\begin{equation}
+    |X_0-X_1|^2 = (x_1-x_0)^2 + (y_1-y_0)^2
+\end{equation}
+
+The expected value for $|X_0-X_1|^2$ is: 
+\begin{align}
+    E[|X_0-X_1|^2] &= E[(x_1-x_0)^2 + (y_1-y_0)^2] \notag \\
+                   &= E[(x_1-x_0)^2] + E[(y_1-y_0)^2]
+\end{align}
+
+Taking eqn 2 in parts: 
+
+\begin{align}
+    E[(x_1-x_0)^2] &= E[x_0^2-2x_0x_1+x_0^2] \notag \\
+                   &= E[x_0^2]-2E[x_0x_1]+E[x_1^2]
+\end{align}
+
+Each point selection is independent of the other. In other words the covariance 
+of $x_n$ and $x_{n+1}$ is 0. So 
+
+\begin{equation}
+    E[x_0x1] = E[x_0]E[x_1]
+\end{equation}
+
+\begin{equation}
+    E[(x_1-x_0)^2] = E[x_0^2]-2E[x_0]E[x_1]+E[x_1^2]
+\end{equation}
+
+
+
+Noting that: 
+\begin{equation}
+    var(x) = E[x^2] - E[x]^2
+\end{equation}
+
+A uniform distribution between 0 and 1 has a variance of
+$\frac{1}{12}(0-1)^2=\frac{1}{12}$ and an expected value of $\frac{1}{2}$, then: 
+\begin{equation}
+    E[x_n^2] = E[x_n]^2+ var(x_n) = \frac{1}{2}^2 + \frac{1}{12} = \frac{1}{3} 
+\end{equation}
+
+\begin{align}
+    E[(x_1-x_0)^2] &= E[x_0^2]-2E[x_0]E[x_1]+E[x_1^2] \notag \\
+                   &= \frac{1}{3} - 2\left(\frac{1}{2}\right)\left(\frac{1}{2}\right) + \frac{1}{3} \notag \\
+                   &= \frac{2}{3} - \frac{1}{2} \notag \\
+    E[(x_1-x_0)^2] &= \frac{1}{6}
+\end{align}
+
+Since both x and y are random variables which will conform to a uniform distribution
+\begin{equation}
+    E[(x_1-x_0)^2] = E[(y_1-y_0)^2]
+\end{equation}
+So 
+
+\begin{equation}
+    E[(x_1-x_0)^2] + E[(y_1-y_0)^2] = \frac{1}{6} + \frac{1}{6} = \frac{1}{3}
+\end{equation}
+
+\pagebreak
+\setcounter{equation}{0}
+4)For two random variables X and Y, the conditional expectation of X given Y=y 
+is defined by $E[X|Y=y]= \sum_x xp(x|Y=y)$ for a fixed y. Show that, for any three 
+random variables A, B and C, $E[A+B|C=c]=E[A|C=c]+E[B|C=c]$.
+
+\begin{align}
+    E[A+B|C=c] &= \sum_a \sum_b (a+b)p(a+b|C=C) \\
+               &= \sum_a \sum_b ap(a+b|C=C) + \sum_a \sum_b bp(a+b|C=C) \notag \\
+               &= \sum_a \sum_b ap(a|C=c)p(b|C=C) + \sum_a \sum_b bp(a|C=c)p(b|C=C) \notag
+\end{align}
+Note that $p[a+b|C=c] = p(a|C=c)p(b|C=c)$, so
+\begin{equation}
+            E[A+B|C=c]   = \sum_a ap(a|C=c) \sum_b p(b|C=c) + \sum_b bp(b|C=c) \sum_a p(a|C=c)
+\end{equation}
+Also note that: 
+$\sum_x p(x|C=c) = 1$, so that
+
+\begin{align}
+            E[A+B|C=c]   &= \sum_a ap(a|C=c) + \sum_b bp(b|C=c) \notag \\
+            E[A+B|C=c]   &= E[A|C=c] + E[B|C=c] 
+\end{align}
+
+\pagebreak
+\setcounter{equation}{0}
+5)A new,rare disease has arisen that affects 1 in every 100,000 people. A medical 
+test has been invented to diagnose the disease. For any person with the disease, 
+the test successfully diagnoses the disease with probability 0.98. However, if 
+someone does not have the disease, the test misdiagnoses them as having the 
+disease with probability 0.002 (called the false positive rate). Person X is 
+tested and the test indicates X has the disease. What is the probability that X 
+actually has the disease? 
+
+\begin{align}
+p(D=1) &= .00001 \\
+p(D=0) &= .99999
+p(\oplus |D=1) &= .98 \\
+p(\ominus |D=0) &= .02 \\
+p(\oplus |D=0) &= .998 \\
+p(\ominus |D=1) &= .002
+\end{align}
+
+So the probability that the patient has the disease, given the test is positive: 
+$p(D=1|\oplus)$ is $\frac{p(\oplus |D=1)P(D=1)}{P(\oplus)}$. Since $P(\oplus)$
+is not given, we first calculate : 
+\begin{align}
+  p(\oplus |D=1)P(D=1)& = .98*.00001 = 9.8e-6 \notag \\ 
+  p(\oplus |D=0)P(D=0)&=  .998*.99999 = .9799902 \notag
+\end{align}
+
+Since we know that $P(D=1|\oplus) + P(D=0|\oplus)=1$, we can normalize 
+the above values so they sum to one: 
+\begin{align}
+  \frac{p(\oplus |D=1)P(D=1)}{p(\oplus} & = \frac{9.8e-6}{9.86e-6+.9799902} =  9.999e-6\notag \\ 
+  p(\oplus |D=0)P(D=0)&=  .998*.99999 = \frac{.9799902}{9.86e-6+.9799902} = .99999 \notag
+\end{align}
+so the chance the patient actually has cancer is .000009999
+
+
+\pagebreak
+\setcounter{equation}{0}
+6)What is the expected number of times I must roll a fair 6-sided die in order 
+to see every number from 1 to 6 at least once? "Fair" means every face 
+(or number) has equal probability of showing.
+
+First consider the problem of how many rolls before you expect to see any single 
+side of a die: 
+
+Let V be a random variable representing the value of a die roll. This value will 
+be represented by a binomial distribution with a probability that you see a given
+value n being $\frac{1}{6}$, and the probability that you see any other value besides
+n being $\frac{5}{6}$
+
+Each roll of the die represents a bernoulli trial (a single test of a random variable 
+with a binomial distribution). Let X be a new random variable representing the 
+number of trials before seeing the value n. X is governed by a geometric distribution, 
+with $p=\frac{1}{6}$. 
+
+\begin{equation}
+    E[X] =\frac{1}{p} = \frac{1}{\frac{1}{6}} = 6
+\end{equation}
+
+Now, consider the larger problem. How many rolls before you all six possible values? 
+We begin by rolling once, when one value is guaranteed to appear. We then keep 
+rolling untill a new value appears. In this case, probability that new value 
+will appear is $\frac{5}{6}$, so again our expected value is governed by a
+geometric distribution. 
+
+   \begin{equation}
+        E[X] =\frac{1}{p} = \frac{1}{\frac{5}{6}} = \frac{6}{5}
+   \end{equation}
+   
+Continuing the pattern, you see that you will have expected values for the 
+remaining numbers of $\frac{6}{4},\frac{6}{3},\frac{6}{2},6$. 
+
+So the total expectation would be: 
+\begin{equation}
+    1+\frac{6}{5}+\frac{6}{4}+\frac{6}{3}+\frac{6}{2}+6=14.7
+\end{equation}	
+
+\end{document}
