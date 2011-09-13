@@ -50,12 +50,10 @@ class Node(object):
         """returns a 3-tuple of (H_x,H_y_x,partitioned_data)"""  
         part_data = {}
         n_data = float(len(ex_set))
-        
         for ex in ex_set: 
                #converts the value to a binned value, really only needed for continuous attrs though
                bin = self.binner(ex[attr_index])    
                part_data.setdefault(bin,[]).append(ex)
-               
         H_y_x = 0
         H_x = 0 
         for bin,data in part_data.iteritems(): 
@@ -71,9 +69,7 @@ class Node(object):
                 H_y_x_bin = 0  
                 
             H_x += -1*p_bin*log(p_bin,2) 
-                
             H_y_x += p_bin*H_y_x_bin
-        
         return H_x,H_y_x,part_data  
               
               
@@ -92,10 +88,13 @@ class Node(object):
         max_GR = (None,None)
         for attr_index in attr_set: 
             H_x, H_y_x, part_data = self.partition_data(ex_set,attr_index)
-            gain_ratio = (H_y - H_y_x)/H_x
-            if gain_ratio > GR: 
-                GR = gain_ratio
-                max_GR = attr_index,part_data
+            try: #the data might not be partable on all attrs
+                gain_ratio = (H_y - H_y_x)/H_x
+                if gain_ratio > GR: 
+                    GR = gain_ratio
+                    max_GR = attr_index,part_data
+            except ZeroDivisionError: 
+                continue        
                  
         return max_GR
         
@@ -143,8 +142,7 @@ class Node(object):
         
         mcc,partable = self.check_ex_set(ex_set,attr_set)
         
-        
-        if partable and not (depth == MAX_DEPTH and MAX_DEPTH > 0): 
+        if partable and not (depth == MAX_DEPTH and MAX_DEPTH > 0):
             attr,part_data = self.max_GR(ex_set,attr_set)
             self.attr_index = attr
             new_attr_set = attr_set[:]
@@ -198,12 +196,10 @@ if __name__=="__main__":
       
 
     #train_attrs = range(1,len(train_data[0])
-    train_attrs = [1,3]
+    train_attrs = range(1,17)
     tree = Node()
     tree.train(train_data,train_attrs)
     
     print tree.shape()
     print "tree root attr_index: ", tree.attr_index
-    print "training data check: " 
-    for ex in train_data: 
-        print ex[1:-1],ex[-1],tree.predict(ex)
+    print "training data check: ", all([ex[-1]==tree.predict(ex) for ex in train_data])
