@@ -79,9 +79,9 @@ class Node(object):
         """returns a 3-tuple of (H_x,H_y_x,partitioned_data)"""  
         part_data = {}
         ex_set = ExampleSet(ex_set)
-        print "  check",len(ex_set),
+        #print "  check",len(ex_set),
         if ex_set.schema[attr_index].type == 'CONTINUOUS': 
-            print "CONTINUOUS"
+            #print "CONTINUOUS"
             self.binner = ContBinner()
             
             ex_set = sorted(ex_set,key=lambda x:x[attr_index])
@@ -104,7 +104,7 @@ class Node(object):
             H_x,H_y_x,part_data = max_entropy_set
                        
         else:   
-            print "DISCRETE"  
+            #print "DISCRETE"  
             for i,ex in enumerate(ex_set): 
                    #converts the value to a binned value, really only needed for continuous attrs though
                    bin = self.binner(ex[attr_index])    
@@ -127,7 +127,7 @@ class Node(object):
         GR = 0
         max_GR = (None,None)
         for attr_index in attr_set: 
-            print "checking attr: ", attr_index
+            #print "checking attr: ", attr_index
             H_x, H_y_x, part_data = self.partition_data(ex_set,attr_index)
             try: #the data might not be partable on all attrs
                 gain_ratio = (H_y - H_y_x)/H_x
@@ -183,7 +183,7 @@ class Node(object):
         ex_set = ExampleSet(ex_set)
                
         mcc,partable = self.check_ex_set(ex_set,attr_set)
-        print "Depth: ", depth, ", Data Length: ", len(ex_set)
+        #print "Depth: ", depth, ", Data Length: ", len(ex_set)
         if partable and not (depth == MAX_DEPTH and MAX_DEPTH > 0):
             attr,part_data = self.max_GR(ex_set,attr_set)
             self.attr_index = attr
@@ -193,9 +193,9 @@ class Node(object):
                 new_attr_set.remove(attr)
             else: 
                 new_attr_set = attr_set    
-            print "Data Length: ", sum(len(sub_data) for f,sub_data in part_data.iteritems()) 
-            print 
-            print
+            #print "Data Length: ", sum(len(sub_data) for f,sub_data in part_data.iteritems()) 
+            #print 
+            #print
             for feature,sub_data in part_data.iteritems():
                 self.children[feature] = Node()
                 self.children[feature].train(sub_data,new_attr_set,depth+1)
