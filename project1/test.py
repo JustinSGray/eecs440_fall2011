@@ -1,6 +1,6 @@
 import unittest
 
-from proj1 import Node, load_project_data
+from dtree import Node, load_project_data
 
 from shell.mldata import ExampleSet
 

@@ -129,6 +129,8 @@ class Node(object):
         for attr_index in attr_set: 
             #print "checking attr: ", attr_index
             H_x, H_y_x, part_data = self.partition_data(ex_set,attr_index)
+            if not H_x: #not partable
+                continue
             try: #the data might not be partable on all attrs
                 gain_ratio = (H_y - H_y_x)/H_x
                 if gain_ratio > GR: 
@@ -184,8 +186,9 @@ class Node(object):
                
         mcc,partable = self.check_ex_set(ex_set,attr_set)
         #print "Depth: ", depth, ", Data Length: ", len(ex_set)
-        if partable and not (depth == MAX_DEPTH and MAX_DEPTH > 0):
-            attr,part_data = self.max_GR(ex_set,attr_set)
+        attr,part_data = self.max_GR(ex_set,attr_set)
+        if part_data and not (depth == MAX_DEPTH and MAX_DEPTH > 0):
+            
             self.attr_index = attr
             
             if ex_set.schema[attr].type == "CONTINUOUS": 
@@ -206,14 +209,16 @@ class Node(object):
             
             
             
-    def predict(self,example): 
+    def predict(self,example,depth=0): 
             
         if self.is_leaf: 
+            #print "leaf at depth ",depth
             return self.classifier
         try:     
             bin = self.binner(example[self.attr_index])
-            return self.children[bin].predict(example)
+            return self.children[bin].predict(example,depth+1)
         except KeyError: #if the classifier is not in this child, randomly select a value
+            #print "random"
             return random.randint(0,1)    
             
     def shape(self): 
@@ -246,13 +251,14 @@ if __name__=="__main__":
     
     train_data,test_data = load_project_data(problem_name)
       
-
     train_attrs = range(1,len(train_data[0])-1)
-    print train_attrs
-    #train_attrs = [1,3]
     tree = Node()
     tree.train(train_data,train_attrs)
     
-    print tree.shape()
-    print "tree root attr_index: ", tree.attr_index
-    print "training data check: ", all([ex[-1]==tree.predict(ex) for ex in train_data])
+    n_data = len(test_data)
+    size,depth = tree.shape()
+    print n_data
+    print "Accuracy: ", sum([ex[-1]==tree.predict(ex) for ex in test_data])/float(n_data)
+    print "Size :", size
+    print "Dept :", depth
+    
