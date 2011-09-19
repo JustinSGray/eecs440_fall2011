@@ -1,0 +1,99 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\title{EECS 440: HW 1}
+\author{Justin Gray}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\maketitle
+
+1)Machine Learning is well suited to the estimation of function values over a 
+certain range of parameters, when the cost of obtaining the actual function value
+is very high (complex engineering analyses for instance). In this case the performance
+measure is usually based on two things; the accuracy of the prediction on the training 
+set, and the accuracy of the prediction over an evaluation set. Accuracy is meauserd 
+by a percentage difference between the predicted function value and the known value. 
+For this use, it is difficult to specify a specifc example representation because it 
+is highly dependent on the specific analysis. However, common techniques include 
+ploynomial regressions, baysian statitiscal models, and neural networks. 
+
+Looking at a specific example, you could consider the job of estimating the drag on a wing
+from a limited number of computational fluid dynamics (CFD) evaluations. The example 
+representation is straitforward, you would include the set of parameters which defined
+a specific wing design as the attributes. These could be either continous, integer values, 
+or possibly discrete (selecting a specific type of NACA airfoil for instance). The 
+classifier would be a continous value of drag predicted by the CFD run for each example. 
+You would run N such examples throuh the CFD to create a supervised learning set. 
+Since the values of drag predicted tend to be highly nonlinear any kind of polynomial 
+regression is not a good choice for a hypothosis space. Instead, a neural network or 
+kriging model would be more appropriate. The choice between the two would come down to a
+few key differences. Firstly, neural networks evaluate much faster than kriging models, 
+so for certain analyses, they would be a clear choice (montecarlo simulations or 
+pareto optimizations). However, Neural networks also require large training sets. If you
+wanted to keep the training cost low, at the expense of evaluation cost of a learned concept, 
+you would pick a kriging model. This will have higher accuracy (especially near trained points, 
+which it predicts perfectly), and can even return a confidence value for it's prediction. 
+
+In th end, a common solution might be to actually train both types of learning processes
+on the same data and come up with some scheme for comparing the two and getting an answer. 
+
+A second interesting use for machine learning would be to predict feeding patterns 
+of newborn infants. The training examples would be simple to construct from measurements
+of baby phisiology such as temperature, respiration rate, heart rate, weight, and age. 
+In addition, you would want to consider time of day, and possibly time since last feeding. 
+The class label could be a binary choice of hungry or not-hungry. However, in this case
+collecting the data could be somewhat challenging. How do you determine if a baby you're 
+measuring is hungry or not hungry? A simple solution would be to simply label them as hungry
+if when offered food, they ate. 
+
+In this case, given a binary classification a decision tree might make an appropriate 
+choice for a hypothosis space for two reasons. Firstly, there is likely to be a lot of 
+noise in the sample set. Obviously, since the "measurements" are imprecise. Also, 
+this is an example of where there is likely to be missing data in some of the attributes. 
+decision trees handle both those situations well. The training data would be a supervised
+learning set of data collected from a large survey of infants. You could not train on a 
+single infant, but the result would be rather useless. After a short time, parents can 
+become very good at learning this information themselves. The goal would be to come 
+up with a perdictor for new parents or for situations (like day-care) where there are a 
+lot of babies who could be hungry and it's not a good idea to offer them all food. 
+
+2) For n boolean values, there are $2^n$ possible examples. This is a simple rule for
+the number of possible combinations with 2 possible values (binary) for n attributes. 
+The number of possible distinct decision trees represents the number of possible 
+
+Each node of a decision tree represents a single binary operation. Either an attribute is
+a 1 or a 0. Hence, there are $2^{x}$ possible different combinations of binary operations 
+which can be perfomed on $x=2^n$ different possible examples. So the total possible number 
+of decision trees is $2^{2^n}$
+
+3) Given that there are some fraction of examples, $p=\frac{m}{k}$, of a set with $f=v$. m is 
+the number of cases with $f=v$ and k is the total number of cases in the example set with a value
+for f. Now, also suppose that some number, n, of examples have no value for f.
+
+According to the method shown in class the examples with missing data must be 
+spread evenly across the bins according the probabilty, p, of an example being in that bin. 
+so: 
+\begin{equation}
+    n_{f=v} = p*n 
+\end{equation}
+
+So the number of examples, $m^*$, for which $f=v$ is now: 
+\begin{equation}
+    m^* = m + n_{f=v} = m+pn = m+\frac{m}{k}n
+\end{equation}
+
+The fraction of examples for which $f=v$, $p^*$, is now: 
+\begin{equation}
+    p^* = \frac{m^*}{n+k} = \frac{m+\frac{m}{k}n}{n+k} = m\frac{1+\frac{n}{k}}{n+k}
+    = \frac{m}{k}\frac{k+n}{n+k} = p
+\end{equation}
+
+Hence $p^*=p$ and the overall fractions remain unchanged.
+
+\end{document}

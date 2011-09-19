@@ -240,7 +240,7 @@ class Node(object):
     
     
 if __name__=="__main__": 
-    random.seed(12345)
+    #random.seed(12345)
     
     problem_name = sys.argv[1]
     MAX_DEPTH = int(sys.argv[2]) #non negative int, if 0 then grow to full depth
@@ -261,4 +261,6 @@ if __name__=="__main__":
     print "Accuracy: ", sum([ex[-1]==tree.predict(ex) for ex in test_data])/float(n_data)
     print "Size :", size
     print "Dept :", depth
+    
+    #print "selection index: ",tree.attr_index
     
