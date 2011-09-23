@@ -1,0 +1,247 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\title{EECS 440: HW 1}
+\author{Justin Gray}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\maketitle
+
+1)Machine Learning is well suited to the estimation of function values over a 
+certain range of parameters, when the cost of obtaining the actual function value
+is very high (complex engineering analyses for instance). In this case the performance
+measure is usually based on two things; the accuracy of the prediction on the training 
+set, and the accuracy of the prediction over an evaluation set. Accuracy is meauserd 
+by a percentage difference between the predicted function value and the known value. 
+For this use, it is difficult to specify a specifc example representation because it 
+is highly dependent on the specific analysis. However, common techniques include 
+ploynomial regressions, baysian statitiscal models, and neural networks. 
+
+Looking at a specific example, you could consider the job of estimating the drag on a wing
+from a limited number of computational fluid dynamics (CFD) evaluations. The example 
+representation is straitforward, you would include the set of parameters which defined
+a specific wing design as the attributes. These could be either continous, integer values, 
+or possibly discrete (selecting a specific type of NACA airfoil for instance). The 
+classifier would be a continous value of drag predicted by the CFD run for each example. 
+You would run N such examples throuh the CFD to create a supervised learning set. 
+Since the values of drag predicted tend to be highly nonlinear any kind of polynomial 
+regression is not a good choice for a hypothosis space. Instead, a neural network or 
+kriging model would be more appropriate. The choice between the two would come down to a
+few key differences. Firstly, neural networks evaluate much faster than kriging models, 
+so for certain analyses, they would be a clear choice (montecarlo simulations or 
+pareto optimizations). However, Neural networks also require large training sets. If you
+wanted to keep the training cost low, at the expense of evaluation cost of a learned concept, 
+you would pick a kriging model. This will have higher accuracy (especially near trained points, 
+which it predicts perfectly), and can even return a confidence value for it's prediction. 
+
+In th end, a common solution might be to actually train both types of learning processes
+on the same data and come up with some scheme for comparing the two and getting an answer. 
+
+A second interesting use for machine learning would be to predict feeding patterns 
+of newborn infants. The training examples would be simple to construct from measurements
+of baby phisiology such as temperature, respiration rate, heart rate, weight, and age. 
+In addition, you would want to consider time of day, and possibly time since last feeding. 
+The class label could be a binary choice of hungry or not-hungry. However, in this case
+collecting the data could be somewhat challenging. How do you determine if a baby you're 
+measuring is hungry or not hungry? A simple solution would be to simply label them as hungry
+if when offered food, they ate. 
+
+In this case, given a binary classification a decision tree might make an appropriate 
+choice for a hypothosis space for two reasons. Firstly, there is likely to be a lot of 
+noise in the sample set. Obviously, since the "measurements" are imprecise. Also, 
+this is an example of where there is likely to be missing data in some of the attributes. 
+decision trees handle both those situations well. The training data would be a supervised
+learning set of data collected from a large survey of infants. You could not train on a 
+single infant, but the result would be rather useless. After a short time, parents can 
+become very good at learning this information themselves. The goal would be to come 
+up with a perdictor for new parents or for situations (like day-care) where there are a 
+lot of babies who could be hungry and it's not a good idea to offer them all food. 
+
+\pagebreak
+2) For n boolean values, there are $2^n$ possible examples. This is a simple rule for
+the number of possible combinations with 2 possible values (binary) for n attributes. 
+The number of possible distinct decision trees represents the number of possible 
+
+Each node of a decision tree represents a single binary operation. Either an attribute is
+a 1 or a 0. Hence, there are $2^{x}$ possible different combinations of binary operations 
+which can be perfomed on $x=2^n$ different possible examples. So the total possible number 
+of decision trees is $2^{2^n}$
+
+\pagebreak
+3) Given that there are some fraction of examples, $p=\frac{m}{k}$, of a set with $f=v$. m is 
+the number of cases with $f=v$ and k is the total number of cases in the example set with a value
+for f. Now, also suppose that some number, n, of examples have no value for f.
+
+According to the method shown in class the examples with missing data must be 
+spread evenly across the bins according the probabilty, p, of an example being in that bin. 
+so: 
+\begin{equation}
+    n_{f=v} = p*n 
+\end{equation}
+
+So the number of examples, $m^*$, for which $f=v$ is now: 
+\begin{equation}
+    m^* = m + n_{f=v} = m+pn = m+\frac{m}{k}n
+\end{equation}
+
+The fraction of examples for which $f=v$, $p^*$, is now: 
+\begin{equation}
+    p^* = \frac{m^*}{n+k} = \frac{m+\frac{m}{k}n}{n+k} = m\frac{1+\frac{n}{k}}{n+k}
+    = \frac{m}{k}\frac{k+n}{n+k} = p
+\end{equation}
+
+Hence $p^*=p$ and the overall fractions remain unchanged.
+
+\pagebreak
+\setcounter{equation}{0}
+4) In a binary classification information gain is defined as: 
+\begin{equation}
+    IG(X) = H(Y) - H(Y|X)
+\end{equation}
+
+Given that H(Y) is defined as: 
+\begin{equation}
+    H(y)= -p^+log_2(p^+)-p^-log_2(p^-)
+\end{equation}
+Noting that $p^+$ and $p^-$ must both sum to 1, and hence
+\begin{align}
+    0 & \leq p^+ \leq 1 \notag \\  
+    0 & \leq p^- \leq 1 
+\end{align}
+
+Since $log_2(x) \leq 0 $ for any $0\leq x \leq 1$, then: 
+\begin{align}
+    -p^+log_2(p^+) \geq 0 \notag \\  
+    -p^-log_2(p^-) \geq 0
+\end{align}
+
+Hence Equation 2 is always positive. The same logic shows that $H(Y|X)$
+must also always be positive. So for $IG(X) \geq 0$ to be true: 
+\begin{align}
+    H(Y) - H(Y|X) \geq 0 \notag \\
+    H(Y) \geq H(Y|X)
+\end{align}
+
+Intuitively, this makes sense, as you would expect that the entropy of the set 
+why, when split by X, should go down. You're organizing the seting to two smaller
+groups, which would represent lower entropy. 
+
+\pagebreak
+5) In this scenario, assume that red is a positive label and blue is a negative label. 
+So for any n, assuming the test is $X\leq n$, then call $p_{L}$ the fraction of points
+to the left of n and $p_{R}$ the fraction of points to the right of n. 
+
+So: 
+\begin{align}
+    p_L &= \frac{L_0+L_1}{L_0+L_1+R_0+R_1} \notag \\
+    p_R &= \frac{R_0+R_1}{L_0+L_1+R_0+R_1} \notag \\
+    p_L^+ &= \frac{L_1}{L_1+L_0+n} \notag \\
+    p_L^- &= \frac{L_0}{L_0+L_1+n} \notag \\
+    p_R^+ &= \frac{R_1}{R_0+R_1+N-n} \notag \\
+    p_R^- &= \frac{R_0}{R_0+R_1+N-n}
+\end{align}
+
+so therefor IG(S(n)) can found as follows: 
+\begin{align}
+    IG(S(n)) &= H(Y) - H(Y|S(n)) \\
+    &= H(Y) - \left(p_L\left(-p_L^+log_2(p_L^+)-p_L^-log_2(p_L^-)\right)+
+    p_R\left(-p_R^+log_2(p_R^+)-p_R^-log_2(p_R^-)\right)\right) \notag
+\end{align}
+
+Taking the derivative w.r.t n, of Eqn. 7 yeilds: 
+\begin{align}
+    \frac{dIG(S(n))}{dn} = & - \frac{d}{dn}\left(p_L\left(-p_L^+log_2(p_L^+)-p_L^-log_2(p_L^-)\right)\right) \notag \\
+    & -\frac{d}{dn}\left(p_R\left(-p_R^+log_2(p_R^+)-p_R^-log_2(p_R^-)\right)\right)
+\end{align}
+
+exanding out eqn. 8 you get: 
+\begin{align}
+    \frac{dIG(S(n))}{dn} =& -\frac{dp_L}{dn}\left(-p_L^+log_2(p_L^+)-p_L^-log_2(p_L^-)\right) \notag \\
+    &-p_L\frac{d}{dn}\left(-p_L^+log_2(p_L^+)-p_L^-log_2(p_L^-)\right) \notag \\
+    &-\frac{dp_R}{dn}\left(-p_R^+log_2(p_R^+)-p_R^-log_2(p_R^-)\right) \notag \\
+    &-p_R\frac{d}{dn}\left(-p_R^+log_2(p_R^+)-p_R^-log_2(p_R^-)\right) \notag \\
+\end{align}
+
+note that 
+\begin{align}
+    \frac{d}{dn}p_L &= 0 \notag \\
+    \frac{d}{dn}p_R &= 0 \notag \\
+    \frac{d}{dn}p_L^+ &= \frac{L_1}{(L_1+L_0+n)^2} \notag \\
+    \frac{d}{dn}p_L^- &= \frac{L_0}{(L_0+L_1+n)^2} \notag \\
+    \frac{d}{dn}p_R^+ &= \frac{R_1}{(R_0+R_1+N-n)^2} \notag \\
+    \frac{d}{dn}p_R^- &= \frac{R_0}{(R_0+R_1+N-n)^2}
+\end{align}
+
+combining eqn. 9 and 10: 
+\begin{align}
+    \frac{dIG(S(n))}{dn} =& p_L\frac{d}{dn}\left(p_L^+log_2(p_L^+)+p_L^-log_2(p_L^-)\right) \notag \\
+    &+p_R\frac{d}{dn}\left(p_R^+log_2(p_R^+)+p_R^-log_2(p_R^-)\right) \notag \\
+\end{align}
+which can be further expanded into: 
+\begin{align}
+    \frac{dIG(S(n))}{dn} =& p_L\frac{d}{dn}\left(p_L^+log_2(p_L^+)\right) \notag \\
+    +&p_L\frac{d}{dn}\left(p_L^-log_2(p_L^-)\right) \notag \\
+    +&p_R\frac{d}{dn}\left(p_R^+log_2(p_R^+)\right) \notag \\
+    +&p_R\frac{d}{dn}\left(p_R^-log_2(p_R^-)\right) \notag \\
+\end{align}
+
+\begin{align}
+    \frac{dIG(S(n))}{dn} =& p_L\frac{dp_L^+}{dn}log_2(p_L^+) + p_Lp_L^+\frac{d}{dn}log_2(p_L^+)\notag \\
+    +&p_L\frac{dp_L^-}{dn}log_2(p_L^-) +p_Lp_L^-\frac{d}{dn}log_2(p_L^-)\notag \\
+    +&p_R\frac{d}{dn}\left(p_R^+log_2(p_R^+)\right) \notag \\
+    +&p_R\frac{d}{dn}\left(p_R^-log_2(p_R^-)\right) \notag \\
+\end{align}
+
+\pagebreak
+6) For this dataset, it is impossible to select a single attribute which provides
+the most informationg gain, because they all provide 0 information gain. In all four 
+cases, after splitting on the attribute the proprotions remain the same (50/50). No splits 
+result in meningful new information. 
+
+When using the weighted method though A1,A2,and A3 are still identical to eachother
+for information gain. However, A4 now has a different set of percentages from the other three: 
+
+\begin{align}
+    p_{A4=T} &= \frac{192}{256} \notag \\
+    p_{A4=F} &= \frac{64}{256} \notag \\
+    p_{A4=T}^+ &=\frac{9+9+9+81}{256} = \frac{108}{256} \notag \\
+    p_{A4=T}^- &= \frac{3+27+27+27}{256} = \frac{84}{256} \notag \\
+    p_{A4=F}^+ &= \frac{3+3+3+27}{256} = \frac{36}{256} \notag \\
+    p_{A4=F}^- &= \frac{1+9+9+9}{256} = \frac{28}{256} \notag
+ \end{align}
+ 
+ So $H(Y|A4)=.9764$: 
+ \begin{equation*}
+ \frac{192}{256}(-\frac{108}{256}log_2(\frac{108}{256})-\frac{84}{256}log_2(\frac{84}{256}))+
+ \frac{64}{256}(-\frac{36}{256}log_2(\frac{36}{256})-\frac{28}{256}log_2(\frac{28}{256}))
+ \end{equation*}
+ 
+ For all other attributes 
+ 
+ \begin{align}
+    p_{A1=T} &= \frac{192}{256} \notag \\
+    p_{A1=F} &= \frac{64}{256} \notag \\
+    p_{A1=T}^+ &=\frac{3+9+27+81}{256} = \frac{120}{256} \notag \\
+    p_{A1=T}^- &= \frac{9+27+9+27}{256} = \frac{72}{256} \notag \\
+    p_{A1=F}^+ &= \frac{3+9+3+9}{256} = \frac{24}{256} \notag \\
+    p_{A1=F}^- &= \frac{1+3+9+27}{256} = \frac{40}{256} \notag
+ \end{align}
+ 
+  So $H(Y|A1)= .9548$: 
+ \begin{equation*}
+ \frac{192}{256}(-\frac{120}{256}log_2(\frac{120}{256})-\frac{72}{256}log_2(\frac{72}{256}))+
+ \frac{64}{256}(-\frac{24}{256}log_2(\frac{24}{256})-\frac{40}{256}log_2(\frac{40}{256}))
+ \end{equation*}
+ 
+ So in this case you can partition of any of A1,A2,or A3 with the same result. A4 would be the last
+ partition. In this case you can partition because information gain is non zero. This happens 
+ for the weighted case case the weights move the data from being perfectly symetrical (50/50) 
+ so that there is some lower entropy state you can get to by partitioning. 
+
+\end{document}
