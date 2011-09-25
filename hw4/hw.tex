@@ -64,21 +64,11 @@ To include a weight decay term, the modifed loss function becomes:
     L_{OC}(p,\hat{p};w) = L(p,\hat{p};w) + \gamma\sum_i\sum_j w_{ij}^2
 \end{equation}
 
-%For the output layer, assuming sigmoid activation functions for $h(u)$, then 
-%\begin{equation}
-%    \frac{dh}{du} = \frac{e^{-u}}{(1+e^{-u})^2} = h(u)(1-h(u))
-%\end{equation}
 
-For the $y_jth$ node, the loss function is
+For the $j th$ output layer node, the loss function is
 \begin{equation}
     L_{OC}(p_j,\hat{p_j}) = L\left(p_j,\hat{p_j}\right) + \gamma\sum_i\sum_j w_{ij}^2
 \end{equation}
-%Noting that: 
-%\begin{equation}
-%    \frac{\partial L}{\partial w_{ji}} = 
-%    \frac{\partial L}{\partial n_j}\frac{\partial n_j}{\partial w_{ji}} = 
-%    \frac{\partial L}{\partial n_j} x_{ji}
-%\end{equation}
 
 So the derivative of the loss w.r.t. $n_j$ is: 
 \begin{equation}
@@ -140,5 +130,34 @@ which simplifies eqn. 13 to:
      -\frac{p_j(1-\hat{p_j})}{ln(10)} \right) x_{ji}
 \end{equation}
 
+For the $jth$ hidden layer node, it's effect on the output layer is only through any downstream nodes its connected to. 
+\begin{equation}
+    \frac{\partial L}{\partial n_j} = \sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}\frac{\partial n_k}{\partial n_j}
+\end{equation}
+\begin{align}
+    n_k =& \sum_l w_{kl} h(n_l) \notag \\
+    \frac{\partial n_k}{\partial n_j} =& \frac{\partial \left( w_{kj} h(n_j)\right)}{\partial n_j} = w_{kj}\frac{\partial h(n_j)}{\partial n_j}
+\end{align}
+
+combining eqns. 14 and 17 yeilds: 
+
+\begin{equation}
+    \frac{\partial n_k}{\partial n_j} = w_{kj}h(n_j)(1-h(n_j))
+\end{equation}
+
+hence:
+\begin{equation}
+    \frac{\partial L}{\partial n_j} = h(n_j)(1-h(n_j))\sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}w_{kj}
+\end{equation}
+
+Using eqn 12 again with eqn 19 gives: 
+\begin{equation}
+    \frac{\partial L}{\partial n_j} = h(n_j)(1-h(n_j)) x_{ji} \sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}w_{kj}
+\end{equation}
+
+expressing $\frac{\partial L}{\partial w_{kj}}$ in terms of only $w_{kj}$ and $x_{kj}$ yeilds: 
+\begin{equation}
+    \frac{\partial L}{\partial n_j} = h(n_j)(1-h(n_j)) x_{ji} \sum_{k \in Downstream(j)} \frac{\partial L}{\partial w_{kj}}\frac{w_{kj}}{x_{kj}}
+\end{equation}
 
 \end{document}
