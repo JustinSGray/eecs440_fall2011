@@ -160,4 +160,49 @@ expressing $\frac{\partial L}{\partial w_{kj}}$ in terms of only $w_{kj}$ and $x
     \frac{\partial L}{\partial n_j} = h(n_j)(1-h(n_j)) x_{ji} \sum_{k \in Downstream(j)} \frac{\partial L}{\partial w_{kj}}\frac{w_{kj}}{x_{kj}}
 \end{equation}
 
+\pagebreak
+\setcounter{equation}{0}
+6) Since no cycles are allowed in this new topology, that means that at least one of the nodes in any layer must be
+completely independent of any other nodes in that layer. Hence the only modification  necessary 
+to the back propagation algorithm for any layer is to also make sure that for any given layer you always start your calculations
+with the node or nodes that are not dependent on any other nodes in that layer. Once you have the derivatives for those nodes, 
+all other nodes can be treated as if they were downstream of those "clean" nodes, and the algorithm remains the same. 
+
+Essentially, all that is necessary is to provide an order, based on the topology of the graph, for the evaluation of nodes in each layer. 
+This ensures that the necessary derivates are available when needed for each layer. 
+
+\pagebreak
+\setcounter{equation}{0}
+7) For the initial network, there is an input layer with sigmoid activations and k nodes. The entering value for each node in the 
+hidden layer will then be $\sum_i^k w_{0,i}*x_{0,i}$. Hence the output of any node in the hidden layer is equal to 
+$h(\sum_i w_{0,i}*x_{0,i})$. The output layer will then have n inputs, one for each node in the hidden layer. 
+The input to the output node will be $h(\sum_i^n w_{1,i}*x_{1,i})$ which equals $h(\sum_i^n w_{1,i}*h(\sum_j^k w_{0,j}*x_{0,j}))$
+
+If the hidden layer used the hyperbolic tangent function, g(x), instead of the sigmoid then the output of the network would be 
+$h(\sum_i^n \hat{w_{1,i}}*g(\sum_j^k w_{0,j}*x_{0,j}))$ instead. To prove that an the two networks are equivilent, the following must be 
+true: 
+\begin{equation}
+    h(\sum_i^n w_{1,i}*h(\sum_j^k w_{0,j}*x_{0,j})) = h(\sum_i^n \hat{w_{1,i}}*g(\sum_j^k w_{0,j}*x_{0,j}))
+\end{equation}
+Which means that 
+\begin{equation}
+    \sum_i^n w_{1,i}*h(\sum_j^k w_{0,j}*x_{0,j}) = \sum_i^n \hat{w_{1,i}}*g(\sum_j^k w_{0,j}*x_{0,j})
+\end{equation}
+So for any value for i, eqn 2 implies that: 
+
+\begin{equation}
+    w_{1,i}*h(\sum_j^k w_{0,j}*x_{0,j}) = \hat{w_{1,i}}*g(\sum_j^k w_{0,j}*x_{0,j})
+\end{equation}
+
+Rearranging eqn. 3 yields: 
+\begin{equation}
+     \hat{w_{1,i}} = \frac{w_{1,i}*h(\sum_j^k w_{0,j}*x_{0,j})}{g(\sum_j^k w_{0,j}*x_{0,j})}
+\end{equation}
+Noticing that the quantity $\sum_j^k w_{0,j}*x_{0,j}$ is simply $n_j$
+\begin{equation}
+     \hat{w_{1,i}} = \frac{w_{1,i}*h(n_j)}{g(n_j)}
+\end{equation}
+
+so by taking any network with sigmoid activation functions in a single hidden layer, and calculating new 
+weighting factors using eqn. 5, you get an equivalent network. 
 \end{document}
