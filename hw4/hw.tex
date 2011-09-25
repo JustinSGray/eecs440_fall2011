@@ -205,4 +205,22 @@ Noticing that the quantity $\sum_j^k w_{0,j}*x_{0,j}$ is simply $n_j$
 
 so by taking any network with sigmoid activation functions in a single hidden layer, and calculating new 
 weighting factors using eqn. 5, you get an equivalent network. 
+
+\pagebreak
+7) 
+    \begin{figure}[htb!]
+        \includegraphics[width=.5\textwidth]{q7}
+    \end{figure}
+    
+    For (-4,-4): both hidden nodes get a signal of -8, so both output negative 1. The weight on the bottom one is -1 though, 
+    so the net input to the output node is 0, and it outputs -1. 
+    
+    For (-1,-1): both hidden nodes get a signal of -2, so the top one outputs 1 and the bottom outputs -1. 
+    the net input to the output node is 2, and it outputs 1. 
+    
+    For (1,1): both hidden nodes get a signal of 2, so the top one outputs 1 and the bottom outputs -1. 
+    the net input to the output node is 2, and it outputs 1. 
+    
+    For (4,4): both hidden nodes get a signal of 8, so the top one outputs 1 and the bottom outputs 1. 
+    the net input to the output node is 0, and it outputs -1. 
 \end{document}
