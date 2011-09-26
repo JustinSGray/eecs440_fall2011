@@ -223,4 +223,26 @@ weighting factors using eqn. 5, you get an equivalent network.
     
     For (4,4): both hidden nodes get a signal of 8, so the top one outputs 1 and the bottom outputs 1. 
     the net input to the output node is 0, and it outputs -1. 
+    
+\pagebreak
+9) As you decrease the weights in this ANN, you can see that the ANN becomes more and more 
+linear. In this case, the network gets fully saturated with the high weights, but the slope gets
+very steep. As you lower the weights, the network does not get saturated, and varies more
+slowly over the range. The whole space gets more flat as well. 
+
+This increasing linearity is what helps to prevent over fitting. 
+    \begin{center}
+    \begin{figure}[htb!]
+        \includegraphics[width=.7\textwidth]{q9_thres5}
+        \caption{Weights set to 5}
+    \end{figure}
+        \begin{figure}[htb!]
+        \includegraphics[width=.7\textwidth]{q9_thres1}
+        \caption{Weights set to 1}
+    \end{figure}
+        \begin{figure}[htb!]
+        \includegraphics[width=.7\textwidth]{q9_thres01}
+        \caption{Weights set to .01}
+    \end{figure}   
+    \end{center}  
 \end{document}
