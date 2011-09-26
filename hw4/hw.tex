@@ -231,6 +231,7 @@ very steep. As you lower the weights, the network does not get saturated, and va
 slowly over the range. The whole space gets more flat as well. 
 
 This increasing linearity is what helps to prevent over fitting. 
+
     \begin{center}
     \begin{figure}[htb!]
         \includegraphics[width=.7\textwidth]{q9_thres5}
@@ -245,4 +246,22 @@ This increasing linearity is what helps to prevent over fitting.
         \caption{Weights set to .01}
     \end{figure}   
     \end{center}  
+    
+\pagebreak
+10) When you ignore the sign activation function, you force the decision boundary
+you create must be purely linear. Effectively, you replace whatever activation 
+function you had with $f(x)=x$. In the case of a single perceptron, this 
+does not change the derivative of the loss function materially. 
+
+For an arbitrary ANN this simplification will 
+dramatically change the derivative of the activation function. Hence, performing 
+a gradient search on this modified derivative will not find weights that actually 
+minimize the loss function. 
+
+Alternatively, you can think of this simplification as linearizing the 
+decision boundary of the ANN. Arbitrary activation functions will have non-linear
+decision boundary, and you would loose all of that functionality by making 
+that simplification. 
+
+   
 \end{document}

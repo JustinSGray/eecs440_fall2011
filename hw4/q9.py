@@ -20,7 +20,7 @@ def activate(x):
         
         outputs[0][i] = sig(val) 
     
-    mult = .01   
+    mult = .00001   
     for j in range(0,len(hidden)): 
         n = sum([mult*x*w for x,w in zip(outputs[0],weights[0][j])]) 
         outputs[1][j] = sig(n)
