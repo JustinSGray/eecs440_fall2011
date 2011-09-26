@@ -18,9 +18,9 @@ outputs = [[0,0],[0,0]]
 def activate(x): 
     for i,val in enumerate(x): 
         
-        outputs[0][i] = sig(val) 
+        outputs[0][i] = val 
     
-    mult = .00001   
+    mult = .01   
     for j in range(0,len(hidden)): 
         n = sum([mult*x*w for x,w in zip(outputs[0],weights[0][j])]) 
         outputs[1][j] = sig(n)
