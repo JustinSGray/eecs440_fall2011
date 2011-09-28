@@ -45,10 +45,18 @@ def load_project_data(project_name,n_folds=5):
         # stochastic backprop
         pos_fold.extend(neg_fold)
         random.shuffle(pos_fold)      
-        fold = ExampleSet(pos_fold)
-        folds.append(fold)
-    
-    return folds
+        folds.append(pos_fold)
+        
+    #create the different training and test set pairs
+    fold_sets = []
+    for i in range(0,n_folds): 
+        test = folds.pop(i)
+        train = []
+        for fold in folds: 
+            train.extend(fold)
+        fold_sets.append((ExampleSet(train),ExampleSet(test)))
+        folds.insert(i,test)
+    return fold_sets
     
 
 def act(x):
@@ -63,21 +71,25 @@ def d_act(y):
 class Node(object): 
     def __init__(self,n_connections,inp_node=False,act_func=act,d_act_func = d_act): 
         self.w = [random.uniform(-.1,.1) for x in range(0,n_connections)]
+        #print "check: ", self.w
         self.x = 0
-        self.d_loss = 0
+        self.n = 0
+        self.dL_dn = 0
+        self.dh_dn = 0
         self.inp_node = inp_node
         self.act_func = act_func
         self.d_act_func = d_act_func 
         
-    def h(self,x): 
+    def h(self,n): 
+        self.n = n #store the n, for use with backprop
         if self.inp_node: 
-            self.x = x
+            self.x = n
         else: 
-            self.x = self.act_func(x)
-        
+            self.x = self.act_func(n)
+        self.dh_dn = self.d_act_func(self.x)
         return self.x    
             
-   
+       
     
 class ANN(object): 
     def __init__(self,training_data,n_hidden): 
@@ -142,12 +154,35 @@ class ANN(object):
             
         return vec
             
-    def train(self,max_iterations=0,gamma=.1,eta=.01): 
+    def train(self,max_iterations=0,gamma=.001,eta=.1): 
        """train the NN instance for at most max_iterations, with a learning rate 
        of eta, and a weight decay of gamma""" 
- 
-       pass 
-       
+       for iter in xrange(0,max_iterations):  
+           for ex in self.training_data: 
+               self.predict(ex)
+               self._backprop(ex[-1],gamma,eta)
+   
+    def _backprop(self,output,gamma,eta): 
+        """takes in a the value of the output expected at the output node"""
+        #output layer
+        out_node = self.nodes[2][0]
+        out_node.dL_dn = (out_node.x-output)*out_node.dh_dn
+        
+        #back layers
+        layers = self.nodes[0:-1]
+        layers.reverse()
+        n_layers = len(layers)
+        for i,layer in enumerate(layers):
+            for node in self.nodes[1]: 
+                dL_dn =[]
+                for j,w in enumerate(node.w): 
+                    dL_dn.append(self.nodes[n_layers-1][j].dL_dn*w*node.x)
+                    dL_dw = out_node.dL_dn*node.x
+                    node.w[j] -= (eta*dL_dw + eta*gamma*w)
+                node.dL_dn = sum(dL_dn)
+            
+                    
+              
     def predict(self,example): 
        """gives the predicted value for the example activated across the NN instance""" 
        inputs = self._input_vector(example)
@@ -155,12 +190,15 @@ class ANN(object):
        #input layer
        for inp,node in zip(inputs,self.nodes[0]): 
            node.h(inp)
+           #print "(",inp,node.h(inp),") ",
            
        #hidden layer
        for i,layer in enumerate(self.nodes[1:]):
+           #print "\n  ",
            for j,node in enumerate(layer): 
+               #print "(",[n.w[j] for n in self.nodes[i]],") ",
                node.h(sum([n.x*n.w[j] for n in self.nodes[i]]))
-           
+           #print
        return self.nodes[-1][0].x > .5
                    
     
@@ -168,11 +206,22 @@ class ANN(object):
 if __name__=="__main__": 
     import sys
     data_name = sys.argv[1]
+    hidden_units = int(sys.argv[2])
+    gamma = float(sys.argv[3])
+    max_iterations = int(sys.argv[4])
+    
     random.seed(12345)
     
     folds = load_project_data(data_name,3)
-    ann = ANN(folds[0],3)
-        
-    for ex in folds[1]: 
-        print ann.predict(ex)
+    networks = []
+    for train_set,test_set in folds: 
+        ann = ANN(train_set,hidden_units)
+        networks.append(ann)
+        ann.train(max_iterations,gamma=gamma)
+
+    
+    #for ex in folds[0]: 
+    #    print ann.predict(ex),ex[-1]
+    
+     
         

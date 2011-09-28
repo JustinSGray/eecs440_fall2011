@@ -70,18 +70,18 @@ For the $j th$ output layer node, the loss function is
     L_{OC}(p_j,\hat{p_j}) = L\left(p_j,\hat{p_j}\right) + \gamma\sum_i\sum_j w_{ij}^2
 \end{equation}
 
-So the derivative of the loss w.r.t. $n_j$ is: 
+So the derivative of the loss w.r.t. $w_{ij}$ is: 
 \begin{equation}
-    \frac{\partial L_{OC}}{\partial n_j} = \frac{\partial}{\partial n_j}L\left(p_j,\hat{p_j})\right)
-    +\frac{\partial}{\partial n_j}\gamma\sum_i\sum_j w_{ij}^2 
+    \frac{\partial L_{OC}}{\partial w_{ij}} = \frac{\partial}{\partial w_{ij}}L\left(p_j,\hat{p_j})\right)
+    +\frac{\partial}{\partial w_{ij}}\gamma\sum_i\sum_j w_{ij}^2 
 \end{equation}
-Note that: 
+Note that, by absorbing the constant into gamma you get: 
 \begin{equation}
-    \frac{\partial}{\partial n_j}\gamma\sum_i\sum_j w_{ij}^2 = 0 
+    \frac{\partial}{\partial w_{ij}}\gamma\sum_i\sum_j w_{ij}^2 = \gamma \sum_i w_{ij}
 \end{equation}
 so 
 \begin{equation}
-    \frac{\partial L_{OC}}{\partial n_j} = \frac{\partial}{\partial n_j}L\left(p_j,\hat{p_j}\right)
+    \frac{\partial L_{OC}}{\partial w_{ij}} = \frac{\partial}{\partial w_{ij}}L\left(p_j,\hat{p_j}\right) + \gamma \sum_i w_{ij}
 \end{equation}
 
 \begin{align}
@@ -130,6 +130,13 @@ which simplifies eqn. 13 to:
      -\frac{p_j(1-\hat{p_j})}{ln(10)} \right) x_{ji}
 \end{equation}
 
+So lastly: 
+\begin{align}
+    \frac{\partial L_{OC}}{\partial w_{ji}} =& \left(\frac{(1-p_j)\hat{p_j}}{ln(10)}
+     -\frac{p_j(1-\hat{p_j})}{ln(10)} \right) x_{ji} + \gamma \sum_i w_{ji} \notag \\
+    \frac{\partial L_{OC}}{\partial n_j} =& \left(\frac{(1-p_j)\hat{p_j}}{ln(10)}
+     -\frac{p_j(1-\hat{p_j})}{ln(10)} \right) + \gamma \sum_i \frac{w_{ji}}{x_{ji}}
+\end{align}
 For the $jth$ hidden layer node, it's effect on the output layer is only through any downstream nodes its connected to. 
 \begin{equation}
     \frac{\partial L}{\partial n_j} = \sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}\frac{\partial n_k}{\partial n_j}
@@ -139,26 +146,15 @@ For the $jth$ hidden layer node, it's effect on the output layer is only through
     \frac{\partial n_k}{\partial n_j} =& \frac{\partial \left( w_{kj} h(n_j)\right)}{\partial n_j} = w_{kj}\frac{\partial h(n_j)}{\partial n_j}
 \end{align}
 
-combining eqns. 14 and 17 yeilds: 
-
+combining eqns. 16, 17, and 18: 
 \begin{equation}
-    \frac{\partial n_k}{\partial n_j} = w_{kj}h(n_j)(1-h(n_j))
+    \frac{\partial L}{\partial n_j} = \frac{\partial h(n_j)}{\partial n_j}\sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}w_{kj}
 \end{equation}
 
-hence:
+To account for the weight decay addition though, eqn. 19 needs to be modified to also include a weight decay term. This is simply added in 
 \begin{equation}
-    \frac{\partial L}{\partial n_j} = h(n_j)(1-h(n_j))\sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}w_{kj}
-\end{equation}
-
-Using eqn 12 again with eqn 19 gives: 
-\begin{equation}
-    \frac{\partial L}{\partial n_j} = h(n_j)(1-h(n_j)) x_{ji} \sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}w_{kj}
-\end{equation}
-
-expressing $\frac{\partial L}{\partial w_{kj}}$ in terms of only $w_{kj}$ and $x_{kj}$ yeilds: 
-\begin{equation}
-    \frac{\partial L}{\partial n_j} = h(n_j)(1-h(n_j)) x_{ji} \sum_{k \in Downstream(j)} \frac{\partial L}{\partial w_{kj}}\frac{w_{kj}}{x_{kj}}
-\end{equation}
+    \frac{\partial L}{\partial n_j} = \gamma \sum_i \frac{w_{ji}}{x_{ji}}+\frac{\partial h(n_j)}{\partial n_j}\sum_{k \in Downstream(j)} \frac{\partial L}{\partial n_k}w_{kj}
+\end{equation} 
 
 \pagebreak
 \setcounter{equation}{0}
