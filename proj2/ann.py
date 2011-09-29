@@ -1,4 +1,4 @@
-from math import e, floor, ceil
+from math import exp, floor, ceil
 import random
 
 from os.path import abspath
@@ -60,8 +60,9 @@ def load_project_data(project_name,n_folds=5):
     
 
 def act(x):
-    """some activation function, given a value for x"""  
-    return 1./(1.+e**-x)
+    """some activation function, given a value for x""" 
+    if x < -400: return 0.0 #hack for numerical issues 
+    return 1./(1.+exp(-x))
     
 def d_act(y):
     """derivative of the act_function as a function of the value of act(x)""" 
@@ -81,6 +82,7 @@ class Node(object):
         self.d_act_func = d_act_func 
         
     def h(self,n): 
+        #print "check:", n
         self.n = n #store the n, for use with backprop
         if self.inp_node: 
             self.x = n
@@ -105,23 +107,23 @@ class ANN(object):
         #dictionary where key is feature name, and value is a two tuple of (mu,sigma)
         self.cont_mapping = {}
         
-        n_data = n_data = float(len(training_data))
+        n_data  = float(len(training_data))
         n_inputs = float(len(training_data.schema[1:-1]))
         
         for j,s in enumerate(training_data.schema[1:-1]): 
             #print s.type, s.name, s.values
             if s.type != 'CONTINUOUS' : 
+                if s.type == "BINARY": 
+                    s.values = [0,1]
                 data = [i for i in range(0,len(s.values))]
                 mu = sum(data)/n_data
-                sig_data = [(d-mu)**2 for d in data]
-                sigma = (sum(sig_data)/n_data)**.5
+                sigma = sum([(d-mu)**2/n_data for d in data])**.5
                 
                 self.nominal_mapping[s.name] = dict([(v,(i-mu)/sigma) for i,v in enumerate(s.values)])
             else: 
                 data = [ex[j+1] for ex in training_data]
                 mu = sum(data)/n_data
-                sig_data = [(d-mu)**2 for d in data]
-                sigma = (sum(sig_data)/n_data)**.5
+                sigma = sum([(d-mu)**2/n_data for d in data])**.5
                 self.cont_mapping[s.name] = {'mu':mu,'sigma':sigma}
         
         #recalc length of inputs with new mapping
@@ -129,15 +131,20 @@ class ANN(object):
         
         self.nodes = []
         #initialize weights to small random values
-        #input nodes
-        self.nodes.append([Node(n_hidden,inp_node=True) for i in range(0,n_inputs)])  
+        if n_hidden: 
+            #input nodes
+            self.nodes.append([Node(n_hidden,inp_node=True) for i in range(0,n_inputs)])  
+                
+            #hidden layer 
+            self.nodes.append([Node(1) for i in range(0,n_hidden)])
             
-        #hidden layer 
-        self.nodes.append([Node(1) for i in range(0,n_hidden)])
-        
-        #output layer
-        self.nodes.append([Node(0),])
-        
+            #output layer
+            self.nodes.append([Node(0),])
+        else: 
+            #input nodes
+            self.nodes.append([Node(1,inp_node=True) for i in range(0,n_inputs)])      
+            #output layer
+            self.nodes.append([Node(0),])
                 
     def _input_vector(self,ex): 
         """takes an example, and returns an input array with all the nominal features
@@ -155,32 +162,46 @@ class ANN(object):
         return vec
             
     def train(self,max_iterations=0,gamma=.001,eta=.1): 
-       """train the NN instance for at most max_iterations, with a learning rate 
-       of eta, and a weight decay of gamma""" 
-       for iter in xrange(0,max_iterations):  
-           for ex in self.training_data: 
-               self.predict(ex)
-               self._backprop(ex[-1],gamma,eta)
-   
+        """train the NN instance for at most max_iterations, with a learning rate 
+        of eta, and a weight decay of gamma""" 
+        iteration = 0
+        while True: 
+            prev_dL_dn = self.nodes[-1][0].dL_dn
+            for i,ex in enumerate(self.training_data):
+                
+                self.predict(ex)
+                self._backprop(ex[-1],gamma,eta)
+            iteration += 1 
+            #print "iteration: ", iteration, abs(self.nodes[-1][0].dL_dn)
+            if max_iterations and iteration == max_iterations: 
+                break
+            if abs(self.nodes[-1][0].dL_dn) < 1e-4: #this is convergence
+                break
+            if abs(self.nodes[-1][0].dL_dn-prev_dL_dn) < 1e-10: #this might be convergence
+                break    
+            
+        return iteration        
+        
     def _backprop(self,output,gamma,eta): 
         """takes in a the value of the output expected at the output node"""
         #output layer
-        out_node = self.nodes[2][0]
-        out_node.dL_dn = (out_node.x-output)*out_node.dh_dn
-        
+        out_node = self.nodes[-1][0]
+        out_node.dL_dn = (out_node.x-output)*out_node.dh_dn        
         #back layers
         layers = self.nodes[0:-1]
         layers.reverse()
         n_layers = len(layers)
+
         for i,layer in enumerate(layers):
-            for node in self.nodes[1]: 
+            for node in self.nodes[i]: 
                 dL_dn =[]
                 for j,w in enumerate(node.w): 
                     dL_dn.append(self.nodes[n_layers-1][j].dL_dn*w*node.x)
                     dL_dw = out_node.dL_dn*node.x
-                    node.w[j] -= (eta*dL_dw + eta*gamma*w)
+                    node.w[j] -= (eta*dL_dw + gamma*w)
                 node.dL_dn = sum(dL_dn)
-            
+        #print "  ",out_node.dL_dn      
+        return out_node.dL_dn    
                     
               
     def predict(self,example): 
@@ -190,16 +211,14 @@ class ANN(object):
        #input layer
        for inp,node in zip(inputs,self.nodes[0]): 
            node.h(inp)
-           #print "(",inp,node.h(inp),") ",
-           
        #hidden layer
        for i,layer in enumerate(self.nodes[1:]):
-           #print "\n  ",
            for j,node in enumerate(layer): 
-               #print "(",[n.w[j] for n in self.nodes[i]],") ",
+               #print "test ",len([n.x*n.w[j] for n in self.nodes[i]]), 
+               #print [("%0.3f"%n.w[j],"%0.6f"%(n.x)) for n in self.nodes[i]]
+               #print
                node.h(sum([n.x*n.w[j] for n in self.nodes[i]]))
-           #print
-       return self.nodes[-1][0].x > .5
+       return self.nodes[-1][0].x
                    
     
     
@@ -212,16 +231,117 @@ if __name__=="__main__":
     
     random.seed(12345)
     
-    folds = load_project_data(data_name,3)
+    folds = load_project_data(data_name,5)
     networks = []
+    
+    TP = []
+    TN = []
+    FP = []
+    FN = []
+    
+    accuracy = []
+    precision = []
+    recall = []
+    results = []
+    ROC_set = []
+    
+    def cont_table(test_set,results,thresh):
+         tp = 0
+         fn = 0
+         fp = 0
+         tn = 0
+         for e,r in zip(test_set,results): 
+            a = r > thresh
+            if e[-1] and a: tp+=1
+            elif e[-1]: fn+=1
+            elif a: fp+=1
+            else: tn+=1
+         return tp,fn,fp,tn   
+        
+    
     for train_set,test_set in folds: 
         ann = ANN(train_set,hidden_units)
-        networks.append(ann)
-        ann.train(max_iterations,gamma=gamma)
-
+        n = ann.train(max_iterations,gamma=gamma)
+        print "trained in %d iterations"%n
+        TP.append(0)
+        TN.append(0)
+        FP.append(0)
+        FN.append(0)
+        
+        result = []
+        for ex in test_set: 
+            a = ann.predict(ex)
+            result.append(a)
+            
+        tp,fn,fp,tn = cont_table(test_set,result,.5)   
+        TP.append(tp)
+        FN.append(fn)
+        FP.append(fp)
+        TN.append(tn)
+        
+        ROC_set.extend(test_set)
+        results.extend(result)  
+          
+        accuracy.append((TP[-1]+TN[-1])/float((TP[-1]+TN[-1]+FP[-1]+FN[-1]))) 
+        if TP[-1]:     
+            precision.append(TP[-1]/float(TP[-1]+FP[-1]))
+            recall.append(TP[-1]/float(TP[-1]+FN[-1]))
+        else: 
+            precision.append(0.0)
+            recall.append(0.0)
+        
+         
     
-    #for ex in folds[0]: 
-    #    print ann.predict(ex),ex[-1]
+    def stats(results): 
+        avg = sum(results)/float(len(results))
+        sigma = sum([((r-avg)**2)/float(len(results)) for r in results])**.5 
+        return avg,sigma
     
-     
+    mu,sigma = stats(accuracy)
+    print "Accuracy: %0.3f, %0.3f"%(mu,sigma) 
+    print
+    mu,sigma = stats(precision)
+    print "Precision: %0.3f, %0.3f"%(mu,sigma) 
+    print
+    mu,sigma = stats(recall)
+    print "Recall: %0.3f, %0.3f"%(mu,sigma)    
+    
+    
+    TP_rate = [0.0]
+    FP_rate = [0.0]
+    #need to sort the data by result
+    results,ROC_set = zip(*sorted(zip(results,ROC_set),reverse=True))
+    #calculation for AROC
+    for r in results: 
+        tp,fn,fp,tn = cont_table(ROC_set,results,r)
+        
+        if fp:   
+            FP_rate.append(fp/float(fp+tn))
+        else: FP_rate.append(0.0)
+        if tp: 
+            TP_rate.append(tp/float(tp+fn))
+        else: TP_rate.append(0.0) 
+    #get the last one
+    tp,fn,fp,tn = cont_table(ROC_set,results,results[-1]*.9)
+        
+    if fp:   
+        FP_rate.append(fp/float(fp+tn))
+    else: FP_rate.append(0.0)
+    if tp: 
+        TP_rate.append(tp/float(tp+fn))
+    else: TP_rate.append(0.0) 
+    
+        
+    aroc = 0  
+    for p1,p2 in zip(zip(FP_rate[0:-1],TP_rate[0:-1]),zip(FP_rate[1:],TP_rate[1:])):
+        #print p2[0],p1[0]
+        aroc += (p2[0]-p1[0])*(p2[1]+p1[1])/2.0  
+    print 
+    print "AROC: %0.3f"%aroc,     
+    from matplotlib import pyplot as p
+    
+    p.plot(FP_rate,TP_rate)
+    p.show()    
+        
+          
         
