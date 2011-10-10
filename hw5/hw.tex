@@ -1,0 +1,137 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\title{EECS 440: HW 5}
+\author{Justin Gray}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\maketitle
+\setcounter{equation}{0}
+
+1) The error rate on the $i^{th}$ set is $\frac{r_i}{n_i}$ which is equal to the 
+Maximum Likelihood Estimator of the true error. 
+
+2) If $e_A - e_b = 0.1$. To find be a the 
+number of tests, n, such that you can guarantee the difference at a 95\% 
+confidence interval, first assume that n is large, so that we can estimate the 
+error with a gaussian distribution making the normal approximation. Then 
+the 95\% confidence interval will lay around $1.96*\sigma$. Without knowing 
+sigma, you can't determine a better answer than that. 
+
+\setcounter{equation}{0}
+
+3) 
+For a general linear program of the form
+
+\begin{equation}
+    \min_x c^T x, Ax \geq b, x \geq 0
+\end{equation}
+
+applying the lagrangian
+\begin{equation}
+   \max_u \min_x l(x,u) = c^T x - u^T A x + u^T b, u \geq 0
+\end{equation} 
+
+Rearanging things a bit
+\begin{equation}
+     \max_u \min_x l(x,u) = \left(c^T - u^T A \right) x + u^T b, u \geq 0
+\end{equation}
+
+There will be a finite minimum w.r.t. x for $l$ if and only if 
+\begin{equation}
+    c^T - u^T A  \geq 0 
+\end{equation}
+Hence
+\begin{equation}
+    A u^T \leq c 
+\end{equation}
+
+The minumum w.r.t. x will be when $\left(c^T - u^T A \right) x = 0 $. So you're 
+left with 
+\begin{equation}
+    \max_u u^t b
+\end{equation}
+
+
+\pagebreak
+\setcounter{equation}{0}
+4) You can view a perceptron as a linear combination of it's inputs with 
+arbitrary weights, which is then passed through a threshold function with value 
+of b. 
+
+To train the weights against a set of n training points, you would look for a
+value of the weights vector, w which minimzies the error function over that set 
+of points. 
+
+\begin{equation}
+    E(w) = \sum_{x \in X}(b_i-w^Tx_i)
+\end{equation}
+
+where $x_i \in X if w^Tx_i \leq b$ is the set of points that are missclassified with that value of $w$. 
+The $b$ vector is there to avoid the trival solution of $w=0$. We now introducing $n$ new
+artificial variables $s_i...s_n$ such that $s_i \geq b_i - w^Tx_i$. Resulting in the 
+following linear program: 
+
+\begin{align}
+    &\min_s \sum_i s_i \notag \\
+    &subject\ to:\ -[s_i - b_i + w^Tx_i]\leq 0
+\end{align}
+
+This formulation works, because you are minimizing the vector $s$, constrained so that
+it is always larger than or equal to the quantity $b_i -w^Tx_i$, which ensures that 
+your error function is minimized, hence training the perceptron. 
+
+To derive the dual of this first apply the lagrangian: 
+\begin{align}
+    l(s,\alpha) = \sum_i s_i - \sum_i \alpha_i[s_i - b_i + w^Tx_i] \notag \\
+    l(s,\alpha) = \sum_i s_i - \sum_i \alpha_i s_i +\sum_i \alpha_i b_i - \sum_i \alpha_i w^Tx_i
+\end{align}
+
+using the K.K.T. conditions: 
+\begin{align}
+    \nabla_s l(s,\alpha) = 1 - \sum_i \alpha_i = 0 \notag \\
+    \sum_i \alpha_i = 1
+\end{align}
+
+\pagebreak
+\setcounter{equation}{0}
+5)
+\begin{align}
+    \min_w \frac{1}{2}||w||^2 + C\sum_i \zeta_i \notag \\
+    \forall i: -[y_i(w \cdot x_i - b) + \zeta_i -1] \leq 0
+\end{align}
+
+So applying the lagrangian: 
+\begin{equation}
+    l(w,\alpha) = \frac{1}{2}||w||^2 + C\sum_i \zeta_i - \sum_i \alpha_i[y_i(w \cdot x_i + b) + \zeta_i -1]
+\end{equation}
+
+using the K.K.T. conditions: 
+\begin{equation}
+    \nabla_w l(w,\alpha) = w - \sum_i \alpha_iy_ix_i = 0 
+\end{equation}
+\begin{equation}
+    w = \sum_i \alpha_i y_i x_i
+\end{equation}
+
+\begin{align}
+    D(\alpha) =& \frac{1}{2}\sum_i\sum_j \alpha_i\alpha_j y_jy_i x_jx_i  + C\sum_i \zeta_i - \sum_i\sum_j \alpha_i\alpha_j y_jy_i x_jx_i 
+    - \sum_i \alpha_i[by_i + \zeta_i -1] \notag \\
+    =& -\frac{1}{2}\sum_i\sum_j \alpha_i\alpha_j y_jy_i x_jx_i+ C\sum_i \zeta_i - b\sum_i \alpha_iy_i - \sum_i \alpha_i\zeta_i + \sum_i \alpha_i]  \notag \\
+    =& -\frac{1}{2}\sum_i\sum_j \alpha_i\alpha_j y_jy_i x_jx_i+ \sum_i (C -\alpha_i)\zeta_i - b\sum_i \alpha_iy_i + \sum_i \alpha_i \notag \\
+    =& \sum_i \alpha_i -\frac{1}{2}\sum_i\sum_j \alpha_i\alpha_j y_jy_i x_jx_i+ \sum_i (C -\alpha_i)\zeta_i 
+\end{align}
+
+So the dual form is: 
+\begin{align}
+    &\max_\alpha \sum_i \alpha_i -\frac{1}{2}\sum_i\sum_j \alpha_i\alpha_j y_jy_i x_jx_i+ \sum_i (C -\alpha_i)\zeta_i  \notag \\
+    &\alpha>=0, \sum_i \alpha_iy_i=0
+\end{align}
+
+\end{document}
