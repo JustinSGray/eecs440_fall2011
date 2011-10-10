@@ -72,10 +72,11 @@ def d_act(y):
 class Node(object): 
     def __init__(self,n_connections,inp_node=False,act_func=act,d_act_func = d_act): 
         self.w = [random.uniform(-.1,.1) for x in range(0,n_connections)]
+        self.dL_dw = [0 for x in range(0,n_connections)]
         #print "check: ", self.w
         self.x = 0
         self.n = 0
-        self.dL_dn = 0
+        #self.dL_dn = 0
         self.dh_dn = 0
         self.inp_node = inp_node
         self.act_func = act_func
@@ -166,42 +167,41 @@ class ANN(object):
         of eta, and a weight decay of gamma""" 
         iteration = 0
         while True: 
-            prev_dL_dn = self.nodes[-1][0].dL_dn
             for i,ex in enumerate(self.training_data):
-                
                 self.predict(ex)
                 self._backprop(ex[-1],gamma,eta)
             iteration += 1 
-            #print "iteration: ", iteration, abs(self.nodes[-1][0].dL_dn)
-            if max_iterations and iteration == max_iterations: 
+            
+            dL_dn = sum([node.dL_dw[0]*node.w[0]/node.x for node in self.nodes[-2]])
+            #if iteration % 10 == 0: print "iteration :", iteration, dL_dn
+            if (iteration >= 30000) or (max_iterations and iteration == max_iterations): 
                 break
-            if abs(self.nodes[-1][0].dL_dn) < 1e-4: #this is convergence
+            if abs(dL_dn) < 1e-3: #this is convergence
                 break
-            if abs(self.nodes[-1][0].dL_dn-prev_dL_dn) < 1e-10: #this might be convergence
-                break    
+            #if abs(self.nodes[-1][0].dL_dn-prev_dL_dn) < 1e-15: #this might be convergence
+            #    break 
+            
             
         return iteration        
         
     def _backprop(self,output,gamma,eta): 
         """takes in a the value of the output expected at the output node"""
-        #output layer
+        #weights into output layer
         out_node = self.nodes[-1][0]
-        out_node.dL_dn = (out_node.x-output)*out_node.dh_dn        
-        #back layers
-        layers = self.nodes[0:-1]
-        layers.reverse()
-        n_layers = len(layers)
-
-        for i,layer in enumerate(layers):
-            for node in self.nodes[i]: 
-                dL_dn =[]
-                for j,w in enumerate(node.w): 
-                    dL_dn.append(self.nodes[n_layers-1][j].dL_dn*w*node.x)
-                    dL_dw = out_node.dL_dn*node.x
-                    node.w[j] -= (eta*dL_dw + gamma*w)
-                node.dL_dn = sum(dL_dn)
-        #print "  ",out_node.dL_dn      
-        return out_node.dL_dn    
+        out_node.dL_dn = (out_node.x-output)*out_node.dh_dn     
+        for node in self.nodes[-2]: 
+            for j,w in enumerate(node.w): 
+                node.dL_dw[j] = out_node.dL_dn*node.x + gamma*w 
+                node.w[j] -= node.dL_dw[j]          
+        
+        if len(self.nodes) > 2: #then there was a hidden layer, so update the weights into that one
+            for j,node in enumerate(self.nodes[-2]): 
+                for prev_node in self.nodes[-3]: 
+                    prev_node.dL_dw[j] = node.dh_dn*prev_node.x*sum([dL_dw*w for dL_dw,w in zip(node.dL_dw,node.w)])
+                    prev_node.w[j] -= prev_node.dL_dw[j]
+        
+          
+         
                     
               
     def predict(self,example): 
@@ -262,7 +262,7 @@ if __name__=="__main__":
     for train_set,test_set in folds: 
         ann = ANN(train_set,hidden_units)
         n = ann.train(max_iterations,gamma=gamma)
-        print "trained in %d iterations"%n
+        #print "trained in %d iterations"%n
         TP.append(0)
         TN.append(0)
         FP.append(0)
@@ -290,8 +290,6 @@ if __name__=="__main__":
             precision.append(0.0)
             recall.append(0.0)
         
-         
-    
     def stats(results): 
         avg = sum(results)/float(len(results))
         sigma = sum([((r-avg)**2)/float(len(results)) for r in results])**.5 
