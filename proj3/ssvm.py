@@ -16,9 +16,47 @@ class SSVM(object):
         return z + 1./alpha*log(1+exp(-alpha*z))
         
     def _Phi(self,w,gamma,alpha): 
-        p = self._p(e-D*(A*w-gamma*e),alpha)
-        return (self.nu*norm(p)**2 + w.T*w[0,0]*gamma**2)/2.0
-                     
+        p = self._p(self.e-self.D*(self.A*w-gamma*self.e),alpha)
+        return (self.nu*norm(p)**2 + (w.T*w)[0,0]*gamma**2)/2.0
+        
+    def _grad_Phi(self,w,gamma,alpha): 
+        center = self._Phi(w,gamma,alpha)
+        d_phi = []
+        dd_phi = []          
+        #partial w.r.t. w  
+        for i,value in enumerate(w):
+            right_w = array(w)
+            if right_w[i,0]: #non, zero
+                right_w[i,0] = right_w[i,0] + right_w[i,0]*.01
+            else: 
+                right_w[i,0] = .01    
+            
+            right = self._Phi(right_w,gamma,alpha)
+            
+            left_w = array(w)
+            if left_w[i,0]: #non, zero
+                left_w[i,0] = left_w[i,0] - left_w[i,0]*.01    
+            else: 
+                left_w[i,0] = -.01
+                    
+            left = self._Phi(left_w,gamma,alpha)
+            
+            d_phi.append((right-left)/(right_w[i,0]-left_w[i,0]))
+            dd_phi.append((right-2*center+left)/(right_w[i,0]-left_w[i,0])**2)
+
+        #partial w.r.t. gamma 
+        right_gamma = gamma * 1.01
+        right = self._Phi(w,right_gamma,alpha)
+        
+        left_gamma = gamma *.99   
+        left = self._Phi(w,left_gamma,alpha)
+        
+        d_phi.append((right-left)/(right_gamma-left_gamma))
+        dd_phi.append((right-2*center+left)/(right_gamma-left_gamma)**2)
+        
+        return center,array(d_phi),array(dd_phi)
+                    
+                         
     def train(self,training_set):
     
         self.training_set = array(training_set.to_float()) 
@@ -35,17 +73,19 @@ class SSVM(object):
             self.sigma[i] = std(column)
             self.training_set[:,i+1] = (self.training_set[:,i+1] - self.mu[i])/self.sigma[i]
             
-        A = matrix(self.training_set[:,1:-1])
+        self.A = matrix(self.training_set[:,1:-1])
         
-        e = matrix(self.training_set[:,-1]).T
-        e = (e==0).choose(e,-1) #replace all 0's with -1
+        self.e = matrix(self.training_set[:,-1]).T
+        self.e = (self.e==0).choose(self.e,-1) #replace all 0's with -1
 
-        D = matrix(array(identity(m))*array(hstack((e,)*m)))
+        self.D = matrix(array(identity(m))*array(hstack((self.e,)*m)))
         
-        w = matrix(zeros((n,1)))
+        self.w = matrix(zeros((n,1)))
         
-        tmp = self._p(e-D*(A*w-gamma*e),5)
-        print norm(tmp,2)**2
+        self.gamma = 1
+        
+        #tmp = self._p(e-D*(A*w-gamma*e),5)
+        print self._grad_Phi(self.w,self.gamma,5) 
         exit()
         
     def predict(self,ex): 
@@ -62,7 +102,7 @@ if __name__=="__main__":
 
     import sys
     data_name = sys.argv[1]
-    gamma = float(sys.argv[2])
+    nu = float(sys.argv[2])
     
     random.seed(12345)
     
@@ -92,7 +132,7 @@ if __name__=="__main__":
     recall = []    
     
     for train_set,test_set in folds: 
-        s = SSVM(train_set,gamma)
+        s = SSVM(train_set,nu)
         results = [s.predict(ex) for ex in test_set]  
         TP,FN,FP,TN = cont_table(test_set,results,0)
         
