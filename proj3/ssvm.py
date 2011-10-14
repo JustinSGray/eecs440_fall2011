@@ -17,7 +17,7 @@ class SSVM(object):
         
     def _Phi(self,w,gamma,alpha): 
         p = self._p(self.e-self.D*(self.A*w-gamma*self.e),alpha)
-        return (self.nu*norm(p)**2 + (w.T*w)[0,0]*gamma**2)/2.0
+        return (self.nu*norm(p)**2 + (w.T*w)[0,0]+gamma**2)/2.0
         
     def _grad_Phi(self,w,gamma,alpha): 
         center = self._Phi(w,gamma,alpha)
@@ -27,7 +27,7 @@ class SSVM(object):
         for i,value in enumerate(w):
             right_w = array(w)
             if right_w[i,0]: #non, zero
-                right_w[i,0] = right_w[i,0] + right_w[i,0]*.01
+                right_w[i,0] += .01*right_w[i,0]
             else: 
                 right_w[i,0] = .01    
             
@@ -35,7 +35,7 @@ class SSVM(object):
             
             left_w = array(w)
             if left_w[i,0]: #non, zero
-                left_w[i,0] = left_w[i,0] - left_w[i,0]*.01    
+                left_w[i,0] -= .01*left_w[i,0]   
             else: 
                 left_w[i,0] = -.01
                     
@@ -45,10 +45,10 @@ class SSVM(object):
             dd_phi.append((right-2*center+left)/(right_w[i,0]-left_w[i,0])**2)
 
         #partial w.r.t. gamma 
-        right_gamma = gamma * 1.01
+        right_gamma = gamma + gamma*.01
         right = self._Phi(w,right_gamma,alpha)
         
-        left_gamma = gamma *.99   
+        left_gamma = gamma - gamma*.01   
         left = self._Phi(w,left_gamma,alpha)
         
         d_phi.append((right-left)/(right_gamma-left_gamma))
@@ -75,8 +75,9 @@ class SSVM(object):
             
         self.A = matrix(self.training_set[:,1:-1])
         
-        self.e = matrix(self.training_set[:,-1]).T
-        self.e = (self.e==0).choose(self.e,-1) #replace all 0's with -1
+        #self.e = matrix(self.training_set[:,-1]).T
+        #self.e = (self.e==0).choose(self.e,-1) #replace all 0's with -1
+        self.e = matrix(ones((m,1)))
 
         self.D = matrix(array(identity(m))*array(hstack((self.e,)*m)))
         
@@ -85,9 +86,17 @@ class SSVM(object):
         self.gamma = 1
         
         #tmp = self._p(e-D*(A*w-gamma*e),5)
-        print self._grad_Phi(self.w,self.gamma,5) 
+        center, d_Phi, dd_Phi =  self._grad_Phi(self.w,self.gamma,2) 
+        #print -d_Phi/dd_Phi
+        while any(abs(d_P) > .01 for d_P in d_Phi): 
+            direction =  array([-d_Phi/dd_Phi]).T
+            self.w = self.w+.5*direction[0:n] 
+            self.gamma = self.gamma + .25*direction[n,0]
+            
+            center, d_Phi, dd_Phi =  self._grad_Phi(self.w,self.gamma,2) 
+            
+            
         exit()
-        
     def predict(self,ex): 
         x= array(ex.to_float()[1:-1])
         for i,(mu,sigma) in enumerate(zip(self.mu,self.sigma)): 
