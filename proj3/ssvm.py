@@ -1,18 +1,24 @@
 import random
 
 from numpy import zeros,dot, vstack, hstack,identity,\
-                  ones, array,average,std, matrix
+                  ones, array,average,std, matrix, exp, log
+from numpy.linalg import norm
 
 from load import load_project_data
         
 class SSVM(object): 
     
-    def __init__(self,training_set,gamma):
-        self.gamma = gamma
+    def __init__(self,training_set,nu):
+        self.nu = nu
         self.train(training_set)
         
+    def _p(self,z,alpha): 
+        return z + 1./alpha*log(1+exp(-alpha*z))
         
-        
+    def _Phi(self,w,gamma,alpha): 
+        p = self._p(e-D*(A*w-gamma*e),alpha)
+        return (self.nu*norm(p)**2 + w.T*w[0,0]*gamma**2)/2.0
+                     
     def train(self,training_set):
     
         self.training_set = array(training_set.to_float()) 
@@ -35,7 +41,11 @@ class SSVM(object):
         e = (e==0).choose(e,-1) #replace all 0's with -1
 
         D = matrix(array(identity(m))*array(hstack((e,)*m)))
-        print D
+        
+        w = matrix(zeros((n,1)))
+        
+        tmp = self._p(e-D*(A*w-gamma*e),5)
+        print norm(tmp,2)**2
         exit()
         
     def predict(self,ex): 
