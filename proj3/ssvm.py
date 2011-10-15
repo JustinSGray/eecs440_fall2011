@@ -1,7 +1,11 @@
 import random
 
 from numpy import zeros,dot, vstack, hstack,identity,\
-                  ones, array,average,std, matrix, exp, log
+                  ones, array,average,std, matrix, exp, log, \
+                  seterr, inf, nan
+                  
+
+
 from numpy.linalg import norm
 
 from load import load_project_data
@@ -17,6 +21,7 @@ class SSVM(object):
         
     def _Phi(self,w,gamma,alpha): 
         p = self._p(self.e-self.D*(self.A*w-gamma*self.e),alpha)
+        
         return (self.nu*norm(p)**2 + (w.T*w)[0,0]+gamma**2)/2.0
         
     def _grad_Phi(self,w,gamma,alpha): 
@@ -24,32 +29,33 @@ class SSVM(object):
         d_phi = []
         dd_phi = []          
         #partial w.r.t. w  
+        delta = .001
         for i,value in enumerate(w):
             right_w = array(w)
             if right_w[i,0]: #non, zero
-                right_w[i,0] += .01*right_w[i,0]
+                right_w[i,0] += delta*right_w[i,0]
             else: 
-                right_w[i,0] = .01    
+                right_w[i,0] = delta    
             
             right = self._Phi(right_w,gamma,alpha)
-            
+
             left_w = array(w)
             if left_w[i,0]: #non, zero
-                left_w[i,0] -= .01*left_w[i,0]   
+                left_w[i,0] -= delta*left_w[i,0]   
             else: 
-                left_w[i,0] = -.01
-                    
+                left_w[i,0] = -delta       
             left = self._Phi(left_w,gamma,alpha)
             
             d_phi.append((right-left)/(right_w[i,0]-left_w[i,0]))
             dd_phi.append((right-2*center+left)/(right_w[i,0]-left_w[i,0])**2)
 
         #partial w.r.t. gamma 
-        right_gamma = gamma + gamma*.01
+        right_gamma = gamma + gamma*delta
         right = self._Phi(w,right_gamma,alpha)
         
-        left_gamma = gamma - gamma*.01   
+        left_gamma = gamma - gamma*delta
         left = self._Phi(w,left_gamma,alpha)
+                
         
         d_phi.append((right-left)/(right_gamma-left_gamma))
         dd_phi.append((right-2*center+left)/(right_gamma-left_gamma)**2)
@@ -75,34 +81,40 @@ class SSVM(object):
             
         self.A = matrix(self.training_set[:,1:-1])
         
-        #self.e = matrix(self.training_set[:,-1]).T
-        #self.e = (self.e==0).choose(self.e,-1) #replace all 0's with -1
         self.e = matrix(ones((m,1)))
 
-        self.D = matrix(array(identity(m))*array(hstack((self.e,)*m)))
+        y = self.training_set[:,-1]
+        y = array([(y==0).choose(y,-1)]).T
+           
+        self.D = matrix(array(identity(m))*array(hstack((y,)*m)))
         
         self.w = matrix(zeros((n,1)))
         
         self.gamma = 1
         
+        alpha = 5
+        
         #tmp = self._p(e-D*(A*w-gamma*e),5)
-        center, d_Phi, dd_Phi =  self._grad_Phi(self.w,self.gamma,2) 
+        center, d_Phi, dd_Phi =  self._grad_Phi(self.w,self.gamma,alpha) 
         #print -d_Phi/dd_Phi
-        while any(abs(d_P) > .01 for d_P in d_Phi): 
-            direction =  array([-d_Phi/dd_Phi]).T
-            self.w = self.w+.5*direction[0:n] 
-            self.gamma = self.gamma + .25*direction[n,0]
-            
-            center, d_Phi, dd_Phi =  self._grad_Phi(self.w,self.gamma,2) 
-            
-            
-        exit()
+        
+        direction =  array([-d_Phi/dd_Phi]).T
+        while norm(direction,2)>0 and any([abs(d_P)>.0001 for d_P in d_Phi]): 
+            self.w = self.w+direction[0:n] 
+            self.gamma = self.gamma + direction[n,0]
+            #print "d",direction.T
+            #print d_Phi
+            center, d_Phi, dd_Phi =  self._grad_Phi(self.w,self.gamma,alpha)
+            direction =  array([-d_Phi/dd_Phi]).T 
+            #print "TEST"
+        print "test",  sum(self.w)/len(self.w), self.gamma
+        #exit()
     def predict(self,ex): 
         x= array(ex.to_float()[1:-1])
         for i,(mu,sigma) in enumerate(zip(self.mu,self.sigma)): 
             x[i] = (x[i]-mu)/sigma
         
-        return (dot(self.w,x) + self.b)[0]
+        return (dot(self.w.T,x) - self.gamma)[0,0]
             
                
         
@@ -113,9 +125,11 @@ if __name__=="__main__":
     data_name = sys.argv[1]
     nu = float(sys.argv[2])
     
+    seterr(all='ignore')
+    
     random.seed(12345)
     
-    folds = load_project_data(data_name,3)
+    folds = load_project_data(data_name,5)
         
     def cont_table(test_set,results,thresh):
          tp = 0
@@ -142,7 +156,10 @@ if __name__=="__main__":
     
     for train_set,test_set in folds: 
         s = SSVM(train_set,nu)
+        
         results = [s.predict(ex) for ex in test_set]  
+        
+        #print results
         TP,FN,FP,TN = cont_table(test_set,results,0)
         
         accuracy.append((TP+TN)/float((TP+TN+FP+FN))) 

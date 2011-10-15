@@ -76,7 +76,7 @@ class SVM(object):
         self.w = array(sol['x'].T[1:n_features+1]).T
         self.p = array(sol['x'].T[n_features+1:]).T
         
-        #print "test", self.b
+        print "test", sum(self.w[0])/len(self.w[0]), self.b
         #print "test", self.w
         #print "test", self.p
         
