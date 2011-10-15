@@ -101,7 +101,7 @@ class SSVM(object):
         direction =  array([-d_Phi/dd_Phi]).T
         while norm(direction,2)>0 and any([abs(d_P)>.0001 for d_P in d_Phi]): 
             self.w = self.w+direction[0:n] 
-            self.gamma = self.gamma + direction[n,0]
+            self.gamma = self.gamma - direction[n,0]
             #print "d",direction.T
             #print d_Phi
             center, d_Phi, dd_Phi =  self._grad_Phi(self.w,self.gamma,alpha)
