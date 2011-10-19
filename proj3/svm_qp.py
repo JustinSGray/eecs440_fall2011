@@ -76,7 +76,7 @@ class SVM(object):
         self.w = array(sol['x'].T[1:n_features+1]).T
         self.p = array(sol['x'].T[n_features+1:]).T
         
-        print "test", sum(self.w[0])/len(self.w[0]), self.b
+        #print "test", sum(self.w[0])/len(self.w[0]), self.b
         #print "test", self.w
         #print "test", self.p
         
@@ -97,6 +97,8 @@ if __name__=="__main__":
     import sys
     data_name = sys.argv[1]
     C = float(sys.argv[2])
+    
+    import time
     
     random.seed(12345)
     
@@ -124,7 +126,7 @@ if __name__=="__main__":
     accuracy = []
     precision = []
     recall = []    
-    
+    start = time.time()
     for train_set,test_set in folds: 
         s = SVM(train_set,C)
         results = [s.predict(ex) for ex in test_set]  
@@ -137,8 +139,13 @@ if __name__=="__main__":
         else: 
             precision.append(0.0)
             recall.append(0.0)
+    end = time.time()
+    
+    print "training time: ", end-start        
             
             
+    print "t-test data: " 
+    print 1-array(accuracy)        
             
     mu,sigma = stats(accuracy)
     print "Accuracy: %0.3f, %0.3f"%(mu,sigma) 

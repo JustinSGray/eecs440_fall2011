@@ -1,0 +1,118 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\title{EECS 440: Progamming Assignment 3}
+\author{Justin Gray}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\maketitle
+
+a) Below is the data from the 5 experiments, run with C=1. The data sets were run with 
+5-fold cross validation and all results averaged. 
+\begin{table}[ht!]
+    \begin{tabular}{|c|c|c|c|c|c|} \hline
+                             & ab            & cr            & sp              & vo              & ye\\ \hline
+    Accuracy ($\mu$,$\sigma$)& 0.785,0.005 & 0.864,0.047 & 0.928,0.004   & 0.947,0.024   &0.696,0.001\\ \hline
+    Precision($\mu$,$\sigma$)& 0.795,0.008 & 0.803,0.066 & 0.921,0.007   & 0.930,0.059   &0.00,0.000\\ \hline
+    Recall   ($\mu$,$\sigma$)& 0.776,0.004 & 0.939,0.029 & 0.895,0.005   & 0.941,0.053   &0.00,0.000\\ \hline  
+    \hline
+    \end{tabular}
+    \caption{data from the linear SVM Experiments}
+\end{table}
+
+\begin{table}[ht!]
+    \begin{tabular}{|c|c|c|c|c|c|} \hline
+                             & ab            & cr            & sp              & vo              & ye\\ \hline
+    Accuracy ($\mu$,$\sigma$)& 0.786,0.006 & 0.865,0.020 & 0.924,0.001   & 0.945,0.029   &0.685,004\\ \hline
+    Precision($\mu$,$\sigma$)& 0.797,0.012 & 0.799,0.018 & 0.925,0.006   & 0.930,0.072   &0.455,0.019\\ \hline
+    Recall   ($\mu$,$\sigma$)& 0.765,0.005 & 0.939,0.038 & 0.880,0.006   & 0.935,0.008   &0.189,0.020\\ \hline  
+    \hline
+    \end{tabular}
+    \caption{data from the linear SSVM Experiments}
+\end{table}
+
+
+\begin{table}[ht!]
+    \begin{tabular}{|c|c|c|c|c|c|} \hline
+                             & ab            & cr            & sp              & vo              & ye\\ \hline
+    Accuracy ($\mu$,$\sigma$)& 0.586,0.054 & 0.698,0.161 & 0.915,0.008   & 0.820,0.010   &0.689,0.021\\ \hline
+    Precision($\mu$,$\sigma$)& 0.660,0.166 & 0.697,0.184 & 0.892,0.011   & 0.689,0.349   &0.489,0.035\\ \hline
+    Recall   ($\mu$,$\sigma$)& 0.671,0.256 & 0.803,0.117 & 0.892,0.014   & 0.646,0.346   &0.457,0.065\\ \hline  
+    \hline
+    \end{tabular}
+    \caption{Data from the perceptron experiments}
+\end{table}
+
+In every case, both the SVM implementations do as good or better than the perceptron tests. The results between the 
+linear svm and the smooth svm are almost identical. Interestingly, the SVM classifiers display a much lower standard 
+deviation than the perceptron ones. This indicates that for each fold in the training data the SVM is doing a much better
+job of avoiding overfitting. The perceptron training case also included a weight minimization term, but it must 
+have been more heavily overshadowed by the loss functin in that case. 
+
+The ssvm and the linear svm show almost identical results, which validates the performance of the smooth svm approximations. 
+The only notable exception was on the YE database, where the ssvm performed notably better. It had nearly the same 
+accuracy, but much better precision and recall.
+
+b) 
+
+\begin{table}[ht!]
+    \begin{tabular}{|c|c|c|c|c|c|} \hline
+    C        & vo              & cr  \\ \hline
+    0.01     & 0.943,0.025     & 0.864, 0.022 \\ \hline
+    2.5075   & 0.947,0.026     & 0.864, 0.022 \\ \hline
+    5.005    & 0.940,0.021     & 0.864, 0.022 \\ \hline
+    7.5025   & 0.940,0.017     & 0.864, 0.022 \\ \hline
+    10       & 0.938,0.020     & 0.864, 0.022 \\ \hline
+    
+    \hline
+    \end{tabular}
+    \caption{Accuracy data $(\mu,\ \sigma)$, data from tests on the vo and cr datasets, vs changing values for C}
+\end{table}
+
+There was a small, but measurable increase in training times as the value of C increased. The cost of putting more 
+weight on mimization of the slack variables must increase the training cost by reducing the magnitude of the 
+gradient somehow and causing the optimization to covnerge more slowly. 
+
+The two datasets show very different trends with regard to accuracy as C is increased. Accuracy went up slightly, then 
+decreased with increaseing C for the vo data set. For the CR dataset, it did not change at all though. This indicates that
+the vo data set is not perfectly linearly seperable, but the cr dataset was. For the linearly seperable case, the 
+slack variables will go to zero and the value for C will be meaningless. 
+
+
+c) 
+\begin{table}[ht!]
+    \begin{tabular}{|c|c|c|c|c|c|} \hline
+                                & ab      & cr    & sp     & vo      & ye\\ \hline
+    Decition Tree vs Perceptron & 0.091   & 0.856 & 0.107  & 0.073   &0.204\\ \hline
+    Decision Tree vs SVM        & 4.88E-7 & 0.050 & (0.921,0.008)   & 0.481   &0.169\\ \hline
+    Perceptron vs SVM           & 7.10e-5 & 0.062 & (0.009,0.010)   & 0.054   &0.511\\ \hline  
+    \hline
+    \end{tabular}
+    \caption{p value from the t-test for the comparison of the different algorithms }
+\end{table}
+
+Of all the t-tests run, only a one allows for absolute, difinitive rejection of the null 
+hypothosiss at the 95\% confidence level: 
+
+for the ab dataset, the perceptron and the SVM perform better than the Decision Tree. 
+It is interesting to note that although the average error rates between the SVM and the Perceptron
+differ by over 10\% (favoring the perceptron), you can not distinguish between the accuracy of the two 
+from the tests run. 
+
+Of the other tests, the CR dataset comparison between the Decision Tree and the SVM lies exactly 
+on the boundary, but the value was roudned down. So you can't actually reject the null hypothesis
+in this case. Similarly, the value for the t-test between the Percetron and the SVM for the ye 
+dataset is almost low enough (but not quite) to all for the rejection of the null hypothosis. 
+
+Othere than the above cases datasets, the results all very strongly suggest that these tests are not 
+complete enough to determine which type of classifier is best on any of these datasets. 
+    
+
+
+\end{document}

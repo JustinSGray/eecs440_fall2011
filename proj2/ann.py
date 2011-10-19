@@ -295,6 +295,11 @@ if __name__=="__main__":
         sigma = sum([((r-avg)**2)/float(len(results)) for r in results])**.5 
         return avg,sigma
     
+    
+    print "t-test data: " 
+    from numpy import array
+    print 1-array(accuracy)   
+    
     mu,sigma = stats(accuracy)
     print "Accuracy: %0.3f, %0.3f"%(mu,sigma) 
     print
@@ -336,10 +341,10 @@ if __name__=="__main__":
         aroc += (p2[0]-p1[0])*(p2[1]+p1[1])/2.0  
     print 
     print "AROC: %0.3f"%aroc,     
-    from matplotlib import pyplot as p
+    #from matplotlib import pyplot as p
     
-    p.plot(FP_rate,TP_rate)
-    p.show()    
+    #p.plot(FP_rate,TP_rate)
+    #p.show()    
         
           
         
