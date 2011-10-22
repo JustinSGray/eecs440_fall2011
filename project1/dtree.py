@@ -87,7 +87,7 @@ class Node(object):
             ex_set = sorted(ex_set,key=lambda x:x[attr_index])
             
             max_entropy_set = (None,None,None)
-
+            print "test"
             for i,(ex1,ex2) in enumerate(zip(ex_set[:-1],ex_set[1:])): 
                 part_data = {}
                 if ex1[-1] == ex2[-1]: #not a threshold
@@ -101,9 +101,11 @@ class Node(object):
                     H_x,H_y_x = self.calc_entropies(part_data)  
                 if H_y_x > max_entropy_set[1]: 
                     max_entropy_set =  H_x,H_y_x,part_data
+            print i   
             H_x,H_y_x,part_data = max_entropy_set
                        
-        else:   
+        else: 
+            print "check"  
             #print "DISCRETE"  
             for i,ex in enumerate(ex_set): 
                    #converts the value to a binned value, really only needed for continuous attrs though
@@ -126,6 +128,8 @@ class Node(object):
 
         GR = 0
         max_GR = (None,None)
+        
+        
         for attr_index in attr_set: 
             #print "checking attr: ", attr_index
             H_x, H_y_x, part_data = self.partition_data(ex_set,attr_index)
@@ -187,6 +191,7 @@ class Node(object):
         mcc,partable = self.check_ex_set(ex_set,attr_set)
         #print "Depth: ", depth, ", Data Length: ", len(ex_set)
         attr,part_data = self.max_GR(ex_set,attr_set)
+        
         if part_data and not (depth == MAX_DEPTH and MAX_DEPTH > 0):
             
             self.attr_index = attr

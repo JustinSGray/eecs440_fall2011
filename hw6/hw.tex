@@ -1,0 +1,166 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\title{EECS 440: HW 6}
+\author{Justin Gray}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\maketitle
+\setcounter{equation}{0}
+1) 
+
+i) For $K = aK_1 + bK_2$, since $K_1$ and $K_2$ are both valid kernels, then each K must 
+have an associated $\psi$, called $\psi_1$ and $\psi_2$. Using mercer's conditions 
+we can show that K is a valid kernel. 
+
+Symmetry: 
+\begin{equation}
+    K(x_1,x_2) = K(x_2,x_1)
+\end{equation}
+\begin{equation}
+    a\psi_1(x_1)\cdot\psi_1(x_2) + b\psi_2(x_1)\cdot\psi_2(x_2) = a\psi_1(x_2)\cdot\psi_1(x_1) + b\psi_2(x_2)\cdot\psi_2(x_1)
+\end{equation}
+Since the dot product is not order dependent: 
+\begin{align}
+    a\psi_1(x_1)\cdot\psi_1(x_2) = a\psi_1(x_2)\cdot\psi_1(x_1) \notag \\
+    b\psi_2(x_1)\cdot\psi_2(x_2) = b\psi_2(x_2)\cdot\psi_2(x_1)
+\end{align}
+With a and b both being positive constants, symmetry holds. 
+
+Positive SemiDefinite: 
+\begin{equation}
+    v^T K v \geq 0, \forall v\neq 0
+\end{equation}
+
+\begin{align}
+    v^T K(x_1,x_2) v &= v^T \left( a\psi_1(x_1)\cdot\psi_1(x_2) + b\psi_2(x_1)\cdot\psi_2(x_2) \right) v \notag \\
+    &= av^T \left( \psi_1(x_1)\cdot \psi_1(x_2) \right) v +  bv^T \left(\psi_2(x_1)\cdot\psi_2(x_2) \right) v \notag \\
+    &= av^T K_1(x_1,x_2)v +  bv^T K_2(x_1,x_2)v 
+    \label{psd_proof1}
+\end{align}
+
+Since both $K_1$ and $K_2$ are valid kernels, then you know each of those is 
+positive-semidefinite. Hence, according to eqn.\ref{psd_proof1} $K = aK_1 + bK_2$
+is also positive-semidefinite.
+
+ii) For $K = aK_1K_2$, since $K_1$ and $K_2$ are both valid kernels, then each K must 
+have an associated $\psi$, called $\psi_1$ and $\psi_2$. Using mercer's conditions 
+we can show that K is a valid kernel. 
+
+Symmetry: 
+\begin{equation}
+    K(x_1,x_2) = K(x_2,x_1)
+\end{equation}
+\begin{equation}
+    a\left(\psi_1(x_1)\cdot\psi_1(x_2)\right)\left(\psi_2(x_1)\cdot\psi_2(x_2)\right) 
+    = a\left(\psi_1(x_2)\cdot\psi_1(x_1)\right)\left(\psi_2(x_2)\cdot\psi_2(x_1)\right)
+    \label{sym2}
+\end{equation}
+The constant a drops out, and since the dot product is not order dependent: 
+\begin{align}
+    \psi_1(x_1)\cdot\psi_1(x_2) = \psi_1(x_2)\cdot\psi_1(x_1) \notag \\
+    \psi_2(x_1)\cdot\psi_2(x_2) = \psi_2(x_2)\cdot\psi_2(x_1)
+\end{align}
+eqn.\ref{sym2} is true and symmetry holds. 
+
+Positive SemiDefinite: 
+\begin{equation}
+    v^T K v \geq 0, \forall v\neq 0
+\end{equation}
+
+\begin{align}
+    v^T K(x_1,x_2) v &= v^T \left( aK_1(x_1,x_2)K_2(x_1,x_2) \right) v \notag \\
+    v^T K(x_1,x_2) v &= av^T \left( K_1(x_1,x_2)K_2(x_1,x_2) \right) v 
+\end{align}
+
+We know that, since $K_1$ and $K_2$ are valid kernels, then 
+\begin{align}
+    v^T K_1(x_1,x_2) v \geq 0 \notag \\
+    v^T K_2(x_1,x_2) v \geq 0 
+\end{align}
+
+Hence eqn.10 also holds and K is a valid kernel. 
+
+\pagebreak
+\setcounter{equation}{0}
+2) For $K(x,y) = (x\cdot y + c)^3$
+
+i)  
+\begin{align}
+   K(x,y) =& (x \cdot y)^3  + 3c(x \cdot y)^2 + 3c^2(x \cdot y) + c^3 \notag \\
+   =& \left(\sum_i x_iy_i\right)\left(\sum_i x_iy_i\right)\left(\sum_i x_iy_i\right) \notag \\
+   &+ 3c\left(\sum_i x_iy_i\right)\left(\sum_i x_iy_i\right) + 3c^2\left(\sum_i x_iy_i\right) + c^3
+\end{align}
+
+\begin{align}
+   K(x,y) =& \left(\sum_{i,j,k} x_ix_jx_ky_iy_jy_k\right) \notag \\
+   &+ 3c\left(\sum_{i,j} x_ix_jy_iy_j\right) + 3c^2\left(\sum_i x_iy_i\right) + c^3
+\end{align}
+
+\begin{align}
+    K(x,y) =& \psi(x)\psi(y) \notag \\
+    \psi(x) =& [x_n^3,x_nx_{n-1}^2,x_nx_{n-1}x_{n-2},...x_1^3, \notag \\
+    &\sqrt{3c}x_n^2,...\sqrt{3c}x_ix_j...\sqrt{3c}x_1^2, \notag \\
+    &\sqrt{3c^2}x_n,...\sqrt{3c^2}x_1,\sqrt{c^3}]
+\end{align}
+
+ii)
+
+symmetry: 
+\begin{equation}
+    K(x,y) = K(y,x) 
+\end{equation}
+
+\begin{equation}
+    (x\cdot y + c)^3 = (y\cdot x + c)^3
+\end{equation}
+Since the dot product is not order specific, symmetry holds! 
+
+Positive SemiDefinite: 
+\begin{equation}
+    v^T K v \geq 0, \forall v\neq 0
+\end{equation}
+
+\begin{align}
+    v^T K v =& v^T\left((x \cdot y)^3  + 3c(x \cdot y)^2 + 3c^2(x \cdot y) + c^3\right)v \notag \\
+    =& v^T\left((x \cdot y)^3\right)v + 3cv^T\left((x \cdot y)^2\right)v  + 3c^2v^T\left((x \cdot y)\right)v + c^3v^Tv
+\end{align}
+
+\begin{equation}
+    v^T\left((x \cdot y)^3\right)v + 3cv^T\left((x \cdot y)^2\right)v  + 3c^2v^T\left((x \cdot y)\right)v \geq -c^3v^Tv
+\end{equation}
+
+\begin{equation}
+    (x \cdot y)\left((x \cdot y)^2v^Tv + 3c(x \cdot y)v^Tv  + 3c^2v^Tv\right) \geq -c^3v^Tv
+\end{equation}
+
+\begin{equation}
+    (x \cdot y)v^Tv\left((x \cdot y)^2 + 3c(x \cdot y)  + 3c^2\right) \geq -c^3v^Tv
+\end{equation}
+
+\begin{equation}
+     (x \cdot y)^3 + 3c(x \cdot y)^2 + 3c^2(x \cdot y) + c^3 \geq 0
+\end{equation}
+
+Assuming that c is some positive constant, and that $x \cdot y$ is a positive quantity, then the above equation is 
+clearly true. if $x \cdot y$ is some negative quantity then
+
+\begin{equation}
+     (x \cdot y)^2 + \frac{1}{3}c^2 \geq \frac{1}{3c}(x \cdot y)^3  + c(x \cdot y)
+\end{equation}
+\begin{equation}
+     (x \cdot y)^2 + \frac{1}{3}c^2 \geq (x \cdot y)\left(\frac{1}{3c}(x \cdot y)^2  + c\right)
+\end{equation}
+
+The l.h.s. of eqn.13 is clearly a positive quantity. On the r.h.s, $\left(\frac{1}{3c}(x \cdot y)^2  + c\right)$ is 
+also a positive quantity, while $(x \cdot y)$ is negative. So the r.h.s. must be a negative quantity, hence 
+eqn.13 is always true. So K is positive semi-definite. 
+
+
+\end{document}
