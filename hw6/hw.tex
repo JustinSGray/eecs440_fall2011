@@ -76,16 +76,17 @@ Positive SemiDefinite:
 
 \begin{align}
     v^T K(x_1,x_2) v &= v^T \left( aK_1(x_1,x_2)K_2(x_1,x_2) \right) v \notag \\
-    v^T K(x_1,x_2) v &= av^T \left( K_1(x_1,x_2)K_2(x_1,x_2) \right) v 
+    &= av^T \left( K_1(x_1,x_2)K_2(x_1,x_2) \right) v \notag \\
+    &= av^T \left(\psi_1(x_1) \cdot \psi_1(x_2)\right)\left(\psi_2(x_1) \cdot \psi_2(x_2)\right) v
 \end{align}
 
-We know that, since $K_1$ and $K_2$ are valid kernels, then 
-\begin{align}
-    v^T K_1(x_1,x_2) v \geq 0 \notag \\
-    v^T K_2(x_1,x_2) v \geq 0 
-\end{align}
+\begin{equation}
+    \left(\psi_1(x_1) \cdot \psi_1(x_2)\right)\left(\psi_2(x_1) \cdot \psi_2(x_2)\right)av^Tv \geq 0
+\end{equation}
 
-Hence eqn.10 also holds and K is a valid kernel. 
+\begin{equation}
+    \left(\psi_1(x_1) \cdot \psi_1(x_2)\right)\left(\psi_2(x_1) \cdot \psi_2(x_2)\right) \geq 0
+\end{equation}
 
 \pagebreak
 \setcounter{equation}{0}
@@ -161,6 +162,39 @@ clearly true. if $x \cdot y$ is some negative quantity then
 The l.h.s. of eqn.13 is clearly a positive quantity. On the r.h.s, $\left(\frac{1}{3c}(x \cdot y)^2  + c\right)$ is 
 also a positive quantity, while $(x \cdot y)$ is negative. So the r.h.s. must be a negative quantity, hence 
 eqn.13 is always true. So K is positive semi-definite. 
+
+
+\pagebreak
+\setcounter{equation}{0}
+3) For $K(x,y) = \psi(x)\cdot \psi(y)$, then
+
+for symmetry: 
+\begin{equation}
+    K(x,y) = K(y,x) 
+\end{equation}
+
+\begin{equation}
+    \psi(x)\cdot \psi(y) = \psi(y)\cdot \psi(x)
+\end{equation}
+
+Which is trivially true, so K is always symetric
+
+for positive semidefinite: 
+\begin{equation}
+    v^T K(x,y) v \geq 0, \forall v\neq 0
+\end{equation}
+
+\begin{equation}
+    v^T \left(\psi(x)\cdot \psi(y)\right) v \geq 0
+\end{equation}
+
+\begin{equation}
+    \left(\psi(x)\cdot \psi(y)\right)v^T  v \geq 0
+\end{equation}
+
+\begin{equation}
+    \psi(x)\cdot \psi(y) \geq 0
+\end{equation}
 
 
 \end{document}
