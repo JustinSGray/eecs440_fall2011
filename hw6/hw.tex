@@ -38,16 +38,25 @@ Positive SemiDefinite:
     v^T K v \geq 0, \forall v\neq 0
 \end{equation}
 
+\begin{equation}
+    v^T K v = (v^T aK_1+ bK_2) v
+\end{equation}
+
+Since K is symmetric, 
 \begin{align}
-    v^T K(x_1,x_2) v &= v^T \left( a\psi_1(x_1)\cdot\psi_1(x_2) + b\psi_2(x_1)\cdot\psi_2(x_2) \right) v \notag \\
-    &= av^T \left( \psi_1(x_1)\cdot \psi_1(x_2) \right) v +  bv^T \left(\psi_2(x_1)\cdot\psi_2(x_2) \right) v \notag \\
-    &= av^T K_1(x_1,x_2)v +  bv^T K_2(x_1,x_2)v 
-    \label{psd_proof1}
+    v^T aK_1K_2 v =& \sum_i\sum_jv_iv_j \left(a(\psi_1(x_i) \cdot \psi_1(x_j))+ b(\psi_2(x_i) \cdot \psi_2(x_j))\right) \notag \\
+    =& a \sum_i\sum_jv_iv_j (\psi_1(x_i) \cdot \psi_1(x_j))+ b\sum_i\sum_jv_iv_j(\psi_2(x_i) \cdot \psi_2(x_j)) \notag \\
+    =& a \parallel \sum_iv_i \psi_1(x_i)\parallel_2^2 + b\parallel\sum_iv_i \psi_2(x_i)\parallel_2^2
 \end{align}
 
-Since both $K_1$ and $K_2$ are valid kernels, then you know each of those is 
-positive-semidefinite. Hence, according to eqn.\ref{psd_proof1} $K = aK_1 + bK_2$
-is also positive-semidefinite.
+Thus
+\begin{equation}
+    a \parallel \sum_iv_i \psi_1(x_i)\parallel_2^2 + b\parallel\sum_iv_i \psi_2(x_i)\parallel_2^2 \geq 0
+\end{equation}
+for all positive values of a,b K will be positive semidefinite
+
+
+
 
 ii) For $K = aK_1K_2$, since $K_1$ and $K_2$ are both valid kernels, then each K must 
 have an associated $\psi$, called $\psi_1$ and $\psi_2$. Using mercer's conditions 
@@ -74,19 +83,23 @@ Positive SemiDefinite:
     v^T K v \geq 0, \forall v\neq 0
 \end{equation}
 
+\begin{equation}
+    v^T K v = v^T aK_1K_2 v
+\end{equation}
+
+Since K is symmetric, 
 \begin{align}
-    v^T K(x_1,x_2) v &= v^T \left( aK_1(x_1,x_2)K_2(x_1,x_2) \right) v \notag \\
-    &= av^T \left( K_1(x_1,x_2)K_2(x_1,x_2) \right) v \notag \\
-    &= av^T \left(\psi_1(x_1) \cdot \psi_1(x_2)\right)\left(\psi_2(x_1) \cdot \psi_2(x_2)\right) v
+    v^T aK_1K_2 v =& a \sum_i\sum_jv_iv_j (\psi_1(x_i) \cdot \psi_1(x_j))(\psi_2(x_i) \cdot \psi_2(x_j)) \notag \\
+    =& a \sum_i\sum_jv_iv_j (\psi_1(x_i) \cdot \psi_1(x_j)) \sum_i\sum_jv_iv_j(\psi_2(x_i) \cdot \psi_2(x_j)) \notag \\
+    =& a \left(\sum_iv_i\psi_1(x_i)\cdot\sum_jv_j\psi_1(x_j)\right) \left(\sum_iv_i\psi_2(x_i)\cdot\sum_jv_j\psi_2(x_j)\right) \notag \\
+    =& a \parallel\sum_iv_i\psi_1(x_i)\parallel_2^2 \parallel\sum_iv_i\psi_2(x_i)\cdot\sum_jv_j\psi_2(x_j)\parallel_2^2
 \end{align}
 
+Hence
 \begin{equation}
-    \left(\psi_1(x_1) \cdot \psi_1(x_2)\right)\left(\psi_2(x_1) \cdot \psi_2(x_2)\right)av^Tv \geq 0
+    a \parallel\sum_iv_i\psi_1(x_i)\parallel_2^2 \parallel\sum_iv_i\psi_2(x_i)\cdot\sum_jv_j\psi_2(x_j)\parallel_2^2 \geq 0
 \end{equation}
 
-\begin{equation}
-    \left(\psi_1(x_1) \cdot \psi_1(x_2)\right)\left(\psi_2(x_1) \cdot \psi_2(x_2)\right) \geq 0
-\end{equation}
 
 \pagebreak
 \setcounter{equation}{0}
@@ -128,41 +141,20 @@ Positive SemiDefinite:
     v^T K v \geq 0, \forall v\neq 0
 \end{equation}
 
+since K is symmetric: 
+
 \begin{align}
-    v^T K v =& v^T\left((x \cdot y)^3  + 3c(x \cdot y)^2 + 3c^2(x \cdot y) + c^3\right)v \notag \\
-    =& v^T\left((x \cdot y)^3\right)v + 3cv^T\left((x \cdot y)^2\right)v  + 3c^2v^T\left((x \cdot y)\right)v + c^3v^Tv
+    v^T K v =& \sum_i \sum_j v_i v_j (x_i \cdot x_j + c^3)  \notag \\
+    =& \sum_i \sum_j v_i v_j (x_i \cdot x_j) + c^3\sum_i \sum_j v_i v_j  \notag \\
+    =& \parallel\sum_i v_ix_i\parallel_2^2 + c^3(\sum_i v_i) ^2 
 \end{align}
 
+for all positive values of c
 \begin{equation}
-    v^T\left((x \cdot y)^3\right)v + 3cv^T\left((x \cdot y)^2\right)v  + 3c^2v^T\left((x \cdot y)\right)v \geq -c^3v^Tv
+    \parallel\sum_i v_ix_i\parallel_2^2 + c^3(\sum_i v_i) ^2 \geq 0
 \end{equation}
 
-\begin{equation}
-    (x \cdot y)\left((x \cdot y)^2v^Tv + 3c(x \cdot y)v^Tv  + 3c^2v^Tv\right) \geq -c^3v^Tv
-\end{equation}
-
-\begin{equation}
-    (x \cdot y)v^Tv\left((x \cdot y)^2 + 3c(x \cdot y)  + 3c^2\right) \geq -c^3v^Tv
-\end{equation}
-
-\begin{equation}
-     (x \cdot y)^3 + 3c(x \cdot y)^2 + 3c^2(x \cdot y) + c^3 \geq 0
-\end{equation}
-
-Assuming that c is some positive constant, and that $x \cdot y$ is a positive quantity, then the above equation is 
-clearly true. if $x \cdot y$ is some negative quantity then
-
-\begin{equation}
-     (x \cdot y)^2 + \frac{1}{3}c^2 \geq \frac{1}{3c}(x \cdot y)^3  + c(x \cdot y)
-\end{equation}
-\begin{equation}
-     (x \cdot y)^2 + \frac{1}{3}c^2 \geq (x \cdot y)\left(\frac{1}{3c}(x \cdot y)^2  + c\right)
-\end{equation}
-
-The l.h.s. of eqn.13 is clearly a positive quantity. On the r.h.s, $\left(\frac{1}{3c}(x \cdot y)^2  + c\right)$ is 
-also a positive quantity, while $(x \cdot y)$ is negative. So the r.h.s. must be a negative quantity, hence 
-eqn.13 is always true. So K is positive semi-definite. 
-
+so K is positive semidefinite
 
 \pagebreak
 \setcounter{equation}{0}
@@ -181,20 +173,61 @@ Which is trivially true, so K is always symetric
 
 for positive semidefinite: 
 \begin{equation}
-    v^T K(x,y) v \geq 0, \forall v\neq 0
+    v^T K v \geq 0, \forall v\neq 0
+\end{equation}
+
+Since K is symmetric, 
+\begin{equation}
+    v^T K v = \sum_i \sum_j v_iv_j\psi(x_i)\cdot \psi(x_j)
 \end{equation}
 
 \begin{equation}
-    v^T \left(\psi(x)\cdot \psi(y)\right) v \geq 0
+    \sum_i \sum_j v_iv_j\psi(x_i)\cdot \psi(x_j) = \sum_i v_i\psi(x_i) \cdot \sum_j v_j\psi(x_j) = \parallel \sum_i v_ix_i \parallel_2^2
 \end{equation}
 
 \begin{equation}
-    \left(\psi(x)\cdot \psi(y)\right)v^T  v \geq 0
+    \parallel \sum_i v_ix_i \parallel_2^2 \geq 0
 \end{equation}
 
+Which is trivially true, so K is positive semidefinite
+
+
+
+
+\pagebreak
+\setcounter{equation}{0}
+4) For Naive Bayes with all continuous attribues, $P(x_i|y) = N(\mu_{i|y},\sigma_{i|y})$.
+
+From lecture notes in class: 
 \begin{equation}
-    \psi(x)\cdot \psi(y) \geq 0
+    ln(\frac{p(y=1)}{p(y=0)} ) + \sum_i ln( \frac{p(x_i|y=1)}{p(x_i|y=0)} )
 \end{equation}
 
+That means that $ln( \frac{p(x_i|y=1)}{p(x_i|y=0)} )$ becomes the ratio of 
+two normal distributions... 
+
+
+
+
+
+\pagebreak
+\setcounter{equation}{0}
+5) You would first split the feature set of the training set
+into two: those features with complete data and those with incomplete data. 
+
+You could simply ignore all of the features from the second set and only fit on the first. But 
+this would be ignoring data that you have. Instead, you could treat the the features from 
+the unknown set as hidden data and apply the EM algorithm to impute the missing data. 
+
+6) Plotting the dataset indicates that there are two islands of positive quantities, 
+one centered around the point (4,8) and the other around the point (0,4). 
+
+This indicates that there is a missing feature in all of the data sets, which 
+would indicate if the data was part of set 1 or set 2. 
+
+So I would modify this training process with EM, adding in two new hidden features 
+for each case (the x and y locations of the center of each group). Those two 
+features would, after converging to solution have to be either (4,8) or (0,4) 
+for all the training cases. 
 
 \end{document}
