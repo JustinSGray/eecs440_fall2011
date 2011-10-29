@@ -1,0 +1,28 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\title{EECS 440: HW 7}
+\author{Justin Gray}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\maketitle
+\setcounter{equation}{0}
+1) Each network has one trivial case where all variables are conditionally 
+independent of eachother. n variables will translate into n nodes in a baysian 
+network. 
+
+For any collection of n nodes, there must be $n^2-n-1$ possible different
+directed graphs combinations, assuming a fixed order for the nodes. Then, 
+reorganizing the nodes will give you n different versions of each combination. 
+
+So the total number of possible networks is $1+ n(n^2-n-1)$. 
+
+
+
+\end{document}

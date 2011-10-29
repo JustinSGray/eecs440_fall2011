@@ -1,6 +1,10 @@
 from load import load_project_data
 
-from math import pi, exp
+from math import pi, exp, log
+
+import random
+
+from numpy import array
 
 
 class DiscreteTrainer(object): 
@@ -70,15 +74,111 @@ class ContinousTrainer(object):
         
         return (pp,np)
         
+class NaiveBayes(object): 
+
+    def __init__(self,m,training_data):
+        if training_data: 
+            self.train(m,training_data)  
+            
+    def train(self,m,training_data): 
+        
+        Y = [x[-1] for x in training_data]
+        n_y1 = sum(Y)
+        n_y = float(len(Y))
+        
+        self.py1 = n_y1/n_y
+        self.py0 = (n_y-n_y1)/n_y
+        self.nodes = []
+        for i,s in enumerate(training_data.schema[1:-1]): 
+            X = [x[i+1] for x in training_data]
+            if s.type=="CONTINUOUS": 
+                node = ContinousTrainer()
+                node.train(X,Y)
+            else: 
+                if s.type=="BINARY": 
+                    s.values = (0,1)
+                    
+                node = DiscreteTrainer()
+                node.train(X,Y,s.values,m)
+                
+            self.nodes.append(node)    
+                
+        
+    def predict(self,X): 
+        X = X[1:-1]
+        pp = self.py1
+        np = self.py0
+        
+        for i,x in enumerate(X): 
+            cpp,cpn = self.nodes[i].cond_prob(x)
+            #print cpp, cpn
+            pp *= cpp
+            np *= cpn
+        
+        if pp>np: 
+            print "+: ",pp
+            return pp
+        print "-:", np   
+        return np    
 
 if __name__=="__main__": 
 
     import sys
     data_name = sys.argv[1]
-    C = float(sys.argv[2])
+    m = float(sys.argv[2])
     
     import time
     
     random.seed(12345)
     
-    folds = load_project_data(data_name,5)
+    folds = load_project_data(data_name,3)
+        
+    def cont_table(test_set,results,thresh):
+         tp = 0
+         fn = 0
+         fp = 0
+         tn = 0
+         for e,r in zip(test_set,results): 
+            a = r > thresh
+            if e[-1] and a: tp+=1
+            elif e[-1]: fn+=1
+            elif a: fp+=1
+            else: tn+=1
+         return tp,fn,fp,tn       
+        
+    def stats(results): 
+        avg = sum(results)/float(len(results))
+        sigma = sum([((r-avg)**2)/float(len(results)) for r in results])**.5 
+        return avg,sigma
+        
+        
+    accuracy = []
+    precision = []
+    recall = []    
+    
+    for train_set,test_set in folds: 
+        nb = NaiveBayes(m,train_set)
+        results = [nb.predict(ex) for ex in test_set]  
+        TP,FN,FP,TN = cont_table(test_set,results,0)
+        
+        accuracy.append((TP+TN)/float((TP+TN+FP+FN))) 
+        if TP:     
+            precision.append(TP/float(TP+FP))
+            recall.append(TP/float(TP+FN))
+        else: 
+            precision.append(0.0)
+            recall.append(0.0)
+            
+            
+    print "t-test data: " 
+    print 1-array(accuracy)   
+    
+    mu,sigma = stats(accuracy)
+    print "Accuracy: %0.3f, %0.3f"%(mu,sigma) 
+    print
+    mu,sigma = stats(precision)
+    print "Precision: %0.3f, %0.3f"%(mu,sigma) 
+    print
+    mu,sigma = stats(recall)
+    print "Recall: %0.3f, %0.3f"%(mu,sigma)           
+
