@@ -23,6 +23,182 @@ reorganizing the nodes will give you n different versions of each combination.
 
 So the total number of possible networks is $1+ n(n^2-n-1)$. 
 
+\pagebreak
+\setcounter{equation}{0}
+3) The transition matrix resulting from the directed graph. 
 
+$
+A = \left( \begin{array}{ccc}
+.4 & .4 & .2 \\
+.4 & .6 & 0. \\
+.8 & 0  & .2 \end{array} \right) 
+$
+
+The stationary distribution for this markov chain is the vector, $v$, such that. 
+
+\begin{equation}
+   Av = v
+\end{equation}
+
+Thus $v$ is the eigen vector of the transition matrix, for an eigen value of 1. 
+
+\begin{equation}
+    v = \left(\begin{array}{c}
+    .444444444 \\
+    .444444444 \\
+    .111111111 \end{array} \right)
+\end{equation}
+
+To test if this disribution is balanced
+\begin{equation}
+     \pi(x)T(x,x') = \pi(x')T(x',x)
+\end{equation}
+for all possible pairs of x, x'
+for x1,x2: 
+\begin{equation}
+     .4444*.4 = .4444*.4
+\end{equation}
+
+for x1,x3: 
+\begin{equation}
+     .4444*.2 = .1111*.8 = .088888
+\end{equation}
+
+for x2,x3: 
+\begin{equation}
+     .4444*0 = .1111*0 = 0
+\end{equation}
+
+note that for any pair composed of the same state twice, the above is trivially satisfied. 
+
+So this distribution does put the markov chain in detailed balance. 
+
+Using such a markov chain to perform direct inference on a bayesian network would work, as the result 
+gives you the probabilities of the unknown variables. However, the challenge here is that to derive such a 
+markov chain you need to make certain assumptions about the data (evidence variables). So you could only 
+perform inference on a given bayesian network if that inference allowed (or assumed) the same evidence 
+originally used to derive the chain. Otherwise you would need to derive a new chain for each new set of 
+evidence variables. 
+
+\pagebreak
+\setcounter{equation}{0}
+4) Using bayes theorem:
+\begin{equation}
+    Pr(X|MB(X))Pr(MB(X)) = Pr(X,MB(X))
+\end{equation}
+
+Since we know that $Pr(MB(X))$ will be fixed relative to X, we ignore it yeilding: 
+
+\begin{equation}
+    Pr(X|MB(X)) \propto Pr(X,MB(X))
+\end{equation}
+
+Since we know that given the MB(X) that X is conditionally independent from the rest of 
+the baysian network, and the $MB(X) = Pa(X) + C(X) + Pa(C(X))$, then: 
+
+\begin{equation}
+    Pr(X|MB(X)) \propto Pr(X|Pa(X))\prod_c P(C|Pa(C))
+\end{equation}
+
+
+\pagebreak
+\setcounter{equation}{0}
+5)
+\begin{equation}
+  P(R,C,W,S) = \alpha \sum_s P(R,-c,w,s) 
+\end{equation}
+
+\begin{equation}
+  \alpha \sum_s P(R,-c,w,s) = \alpha P(R|-c)P(-c)\sum_s P(W|R,S)P(S|-c)
+\end{equation}
+Where s is a hidden value. 
+
+i) The factors are as follows: 
+
+\begin{table}[h!]
+  \begin{tabular}{|c|c|}
+    \hline
+    c & $F_R$ \\
+    F & .2 \\
+    \hline 
+  \end{tabular}
+\end{table}
+
+\begin{table}[h!]
+  \begin{tabular}{|c|c|}
+    \hline
+    c & $F_C$ \\
+    F & .5 \\
+    \hline 
+  \end{tabular}
+\end{table}
+
+\begin{table}[h!]
+  \begin{tabular}{|c|c|c|}
+    \hline
+    S & R & $F_W$ \\
+    T & T & .9 \\
+    T & F & .8 \\
+    F & T & .6 \\
+    F & F & .1 \\
+    \hline 
+  \end{tabular}
+\end{table}
+
+\begin{table}[h!]
+  \begin{tabular}{|c|c|}
+    \hline
+    C & $F_S$ \\
+    F & .5 \\
+    \hline 
+  \end{tabular}
+\end{table}
+
+Working from right to left you get $F_{WS}(S,R,C)$: 
+\begin{table}[h!]
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    S & R & C & $F_{WS}$ \\
+    T & T & F & .9*.5 \\
+    T & F & F & .8*.5 \\
+    F & T & F & .6*.5 \\
+    F & F & F & .1*.5 \\
+    \hline 
+  \end{tabular}
+\end{table}
+
+Now $\sum_s F_{WS}(R,S,C):$
+
+\begin{table}[h!]
+  \begin{tabular}{|c|c|c|}
+    \hline
+    R & C & $F_{W\bar{S}}$ \\
+    T & F & (.9*.5)+(.6*.5) \\
+    F & F & (.8*.5)+(.1*.5) \\
+    \hline 
+  \end{tabular}
+\end{table}
+
+\pagebreak
+Lastly $\sum_s F_{RCW\bar{S}}(R,C):$
+
+\begin{table}[h!]
+  \begin{tabular}{|c|c|c|}
+    \hline
+    R & C & $F_{RCW\bar{S}}$ \\
+    T & F & [(.9*.5)+(.8*.5)](.5)(.2) \\
+    F & F & [(.8*.5)+(.1*.5)](.5)(.2) \\
+    \hline 
+  \end{tabular}
+\end{table}
+
+\begin{equation}
+P(R,-c,w,s) =  \alpha<.085,.045> = <.6539,.3462>
+\end{equation}
+
+So the probability that it did rain is .6539.
+
+ii) Using rejection sampling with 10,000 samples, you get a probibility of 
+.6499
 
 \end{document}
