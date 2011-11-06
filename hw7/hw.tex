@@ -9,6 +9,8 @@
 \usepackage{graphicx}
 \usepackage{float}
 
+\usepackage{minted}
+
 \begin{document}
 
 \maketitle
@@ -22,6 +24,41 @@ directed graphs combinations, assuming a fixed order for the nodes. Then,
 reorganizing the nodes will give you n different versions of each combination. 
 
 So the total number of possible networks is $1+ n(n^2-n-1)$. 
+
+\pagebreak
+\setcounter{equation}{0}
+2) 
+we know that
+\begin{equation}
+    \pi_{t+1}(x^{\prime}) = \sum_x \pi_t(x)T(x,x^{\prime}) 
+\end{equation}
+
+for a markov chain with detailed balance: 
+\begin{equation}
+    \pi_t(x)T(x,x^{\prime}) =  \pi_t(x^{\prime})T(x^{\prime},x)
+\end{equation}
+
+combining equations 1 and 2 yeilds: 
+
+\begin{equation}
+    \pi_{t+1}(x^{\prime}) = \sum_x \pi_t(x^{\prime})T(x^{\prime},x) 
+\end{equation}
+
+Since $\pi_t(x^{\prime})$ is independent of x, it can move outside the summation
+
+\begin{equation}
+    \pi_{t+1}(x^{\prime}) = \pi_t(x^{\prime}) \sum_x T(x^{\prime},x) 
+\end{equation}
+
+Notice that $\sum_x T(x^{\prime},x)$ must equal 1, so 
+
+\begin{equation}
+    \pi_{t+1}(x') = \pi_{t}(x')
+\end{equation}
+
+And the chain is stationary
+
+
 
 \pagebreak
 \setcounter{equation}{0}
@@ -104,101 +141,34 @@ the baysian network, and the $MB(X) = Pa(X) + C(X) + Pa(C(X))$, then:
 \pagebreak
 \setcounter{equation}{0}
 5)
+i) \begin{equation}
+  Pr(R|-c,w) = \alpha P(R,-c,w)=\alpha Pr(-c)Pr(R|-c)\sum_x Pr(S|-c) Pr(W|S,R)
+\end{equation}
+
+For the case where it did rain: 
 \begin{equation}
-  P(R,C,W,S) = \alpha \sum_s P(R,-c,w,s) 
+  Pr(R|-c,w) = \alpha .5*.2*(.5*.9+.5*.6) = \alpha .075
+\end{equation}
+
+For the case where it did not rain: 
+\begin{equation}
+  Pr(R|-c,w) = \alpha .5*.8*(.5*.8+.5*.1) = \alpha .180
 \end{equation}
 
 \begin{equation}
-  \alpha \sum_s P(R,-c,w,s) = \alpha P(R|-c)P(-c)\sum_s P(W|R,S)P(S|-c)
-\end{equation}
-Where s is a hidden value. 
-
-i) The factors are as follows: 
-
-\begin{table}[h!]
-  \begin{tabular}{|c|c|}
-    \hline
-    c & $F_R$ \\
-    F & .2 \\
-    \hline 
-  \end{tabular}
-\end{table}
-
-\begin{table}[h!]
-  \begin{tabular}{|c|c|}
-    \hline
-    c & $F_C$ \\
-    F & .5 \\
-    \hline 
-  \end{tabular}
-\end{table}
-
-\begin{table}[h!]
-  \begin{tabular}{|c|c|c|}
-    \hline
-    S & R & $F_W$ \\
-    T & T & .9 \\
-    T & F & .8 \\
-    F & T & .6 \\
-    F & F & .1 \\
-    \hline 
-  \end{tabular}
-\end{table}
-
-\begin{table}[h!]
-  \begin{tabular}{|c|c|}
-    \hline
-    C & $F_S$ \\
-    F & .5 \\
-    \hline 
-  \end{tabular}
-\end{table}
-
-Working from right to left you get $F_{WS}(S,R,C)$: 
-\begin{table}[h!]
-  \begin{tabular}{|c|c|c|c|}
-    \hline
-    S & R & C & $F_{WS}$ \\
-    T & T & F & .9*.5 \\
-    T & F & F & .8*.5 \\
-    F & T & F & .6*.5 \\
-    F & F & F & .1*.5 \\
-    \hline 
-  \end{tabular}
-\end{table}
-
-Now $\sum_s F_{WS}(R,S,C):$
-
-\begin{table}[h!]
-  \begin{tabular}{|c|c|c|}
-    \hline
-    R & C & $F_{W\bar{S}}$ \\
-    T & F & (.9*.5)+(.6*.5) \\
-    F & F & (.8*.5)+(.1*.5) \\
-    \hline 
-  \end{tabular}
-\end{table}
-
-\pagebreak
-Lastly $\sum_s F_{RCW\bar{S}}(R,C):$
-
-\begin{table}[h!]
-  \begin{tabular}{|c|c|c|}
-    \hline
-    R & C & $F_{RCW\bar{S}}$ \\
-    T & F & [(.9*.5)+(.8*.5)](.5)(.2) \\
-    F & F & [(.8*.5)+(.1*.5)](.5)(.2) \\
-    \hline 
-  \end{tabular}
-\end{table}
-
-\begin{equation}
-P(R,-c,w,s) =  \alpha<.085,.045> = <.6539,.3462>
+P(R|-c,w) =  \alpha<.075,.180> = <.3,.7>
 \end{equation}
 
-So the probability that it did rain is .6539.
+So the probability that it did rain is 0.3.
 
-ii) Using rejection sampling with 10,000 samples, you get a probibility of 
-.6499
+ii) Using rejection sampling with 10,000 samples, you get a probability of 
+.2912
+
+{\scriptsize \inputminted{python}{rejection_sampling.py} }
+
+iii) Using gibbs sampling with 10,000 samples (measuring on the last 5000) you get a probability of 
+.2924
+
+{\scriptsize \inputminted{python}{gibbs.py} }
 
 \end{document}

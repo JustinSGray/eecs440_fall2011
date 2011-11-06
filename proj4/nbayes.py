@@ -106,20 +106,17 @@ class NaiveBayes(object):
         
     def predict(self,X): 
         X = X[1:-1]
-        pp = self.py1
-        np = self.py0
+        pp = log(self.py1)
+        np = log(self.py0)
         
         for i,x in enumerate(X): 
             cpp,cpn = self.nodes[i].cond_prob(x)
             #print cpp, cpn
-            pp *= cpp
-            np *= cpn
+            pp += log(cpp)
+            np += log(cpn)
         
-        if pp>np: 
-            print "+: ",pp
-            return pp
-        print "-:", np   
-        return np    
+        
+        return (pp>np,pp)   
 
 if __name__=="__main__": 
 
@@ -156,10 +153,14 @@ if __name__=="__main__":
     precision = []
     recall = []    
     
+    results = []
+    ROC_set = []
     for train_set,test_set in folds: 
         nb = NaiveBayes(m,train_set)
-        results = [nb.predict(ex) for ex in test_set]  
-        TP,FN,FP,TN = cont_table(test_set,results,0)
+        result = [nb.predict(ex) for ex in test_set]  
+        results.extend(result)
+        ROC_set.extend(test_set)
+        TP,FN,FP,TN = cont_table(test_set,[x[0] for x in result],0)
         
         accuracy.append((TP+TN)/float((TP+TN+FP+FN))) 
         if TP:     
@@ -180,5 +181,45 @@ if __name__=="__main__":
     print "Precision: %0.3f, %0.3f"%(mu,sigma) 
     print
     mu,sigma = stats(recall)
-    print "Recall: %0.3f, %0.3f"%(mu,sigma)           
+    print "Recall: %0.3f, %0.3f"%(mu,sigma)
+    
+    TP_rate = [0.0]
+    FP_rate = [0.0]
+    #need to sort the data by result
+    
+    
+    results = [r[1] for r in results]
+    results,ROC_set = zip(*sorted(zip(results,ROC_set),reverse=True))
+    #calculation for AROC
+    for r in results: 
+        tp,fn,fp,tn = cont_table(ROC_set,results,r)
+        
+        if fp:   
+            FP_rate.append(fp/float(fp+tn))
+        else: FP_rate.append(0.0)
+        if tp: 
+            TP_rate.append(tp/float(tp+fn))
+        else: TP_rate.append(0.0) 
+    #get the last one
+    tp,fn,fp,tn = cont_table(ROC_set,results,results[-1]*.9)
+        
+    if fp:   
+        FP_rate.append(fp/float(fp+tn))
+    else: FP_rate.append(0.0)
+    if tp: 
+        TP_rate.append(tp/float(tp+fn))
+    else: TP_rate.append(0.0) 
+    
+        
+    aroc = 0  
+    for p1,p2 in zip(zip(FP_rate[0:-1],TP_rate[0:-1]),zip(FP_rate[1:],TP_rate[1:])):
+        #print p2[0],p1[0]
+        aroc += (p2[0]-p1[0])*(p2[1]+p1[1])/2.0  
+    print 
+    print "AROC: %0.3f"%aroc,   
+    
+    from matplotlib import pyplot as p
+    
+    p.plot(FP_rate,TP_rate)
+    p.show()          
 
