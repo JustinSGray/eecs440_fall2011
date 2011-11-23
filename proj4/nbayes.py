@@ -29,8 +29,10 @@ class DiscreteTrainer(object):
         n_y1 = float(n_y1)
         n_y0 = float(n_y0) 
         
+        if m < 0: 
+            m = float(len(allowed_values))
         p = 1/float(len(allowed_values)) #prior probibility for smoothing
-               
+             
         for value in allowed_values:           
             self.pbins[value] = (self.pbins[value]+m*p)/(n_y1+m)
             self.nbins[value] = (self.nbins[value] +m*p)/(n_y0+m)
@@ -112,8 +114,14 @@ class NaiveBayes(object):
         for i,x in enumerate(X): 
             cpp,cpn = self.nodes[i].cond_prob(x)
             #print cpp, cpn
-            pp += log(cpp)
-            np += log(cpn)
+            try: 
+                pp += log(cpp)
+            except ValueError: 
+                pass #if there is no probability, just skip it 
+            try:     
+                np += log(cpn)
+            except ValueError: 
+                pass #same as above
         
         
         return (pp>np,pp)   
@@ -128,7 +136,7 @@ if __name__=="__main__":
     
     random.seed(12345)
     
-    folds = load_project_data(data_name,3)
+    folds = load_project_data(data_name,5)
         
     def cont_table(test_set,results,thresh):
          tp = 0
@@ -218,8 +226,8 @@ if __name__=="__main__":
     print 
     print "AROC: %0.3f"%aroc,   
     
-    from matplotlib import pyplot as p
+    #from matplotlib import pyplot as p
     
-    p.plot(FP_rate,TP_rate)
-    p.show()          
+    #p.plot(FP_rate,TP_rate)
+    #p.show()          
 
